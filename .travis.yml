@@ -1,0 +1,15 @@
+language: csharp
+mono: none
+os: linux
+dist: bionic
+dotnet: 2.2
+script:
+- dotnet build -c Release
+- dotnet pack -c Release
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: dotnet nuget push src/AspNetCore.EventLog/bin/Release/AspNetCore.EventLog.*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
+  on:
+    tags: true
+    branch: master
