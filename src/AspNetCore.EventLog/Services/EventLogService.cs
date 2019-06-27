@@ -52,6 +52,23 @@ namespace AspNetCore.EventLog.Services
         }
 
 
+        public Task SaveEventsAsync(IEnumerable<object> events, DbTransaction transaction, Guid transactionId)
+        {
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            CreateConnection(transaction.Connection);
+
+            var entries = events.Select(@event => new EventLog().CreateEventLog(@event, transactionId, _options.JsonSettings));
+
+
+            Context.Database.UseTransaction(transaction);
+            Context.EventLogs.AddRange(entries);
+
+            return Context.SaveChangesAsync();
+        }
+
+
 
         public async Task DispatchByTransactionId(DbConnection connection, Guid transactionId)
         {
