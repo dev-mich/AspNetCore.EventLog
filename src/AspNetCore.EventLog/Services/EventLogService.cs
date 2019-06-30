@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.DependencyInjection;
+using AspNetCore.EventLog.Exceptions;
 using AspNetCore.EventLog.Infrastructure;
 using AspNetCore.EventLog.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -112,6 +113,9 @@ namespace AspNetCore.EventLog.Services
                     _logger.LogError($"Dispatch failed for event of type {eventLog.EventTypeName} due to {ex.Message}");
 
                     await SetEventState(eventLog.Id, EventState.PublishedFailed);
+
+                    if (ex.GetType() == typeof(CriticalException))
+                        throw;
                 }
             }
 
