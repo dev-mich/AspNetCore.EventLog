@@ -2,33 +2,31 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
+using AspNetCore.EventLog.Abstractions.Event;
+using AspNetCore.EventLog.Abstractions.EventHandling;
 using AspNetCore.EventLog.DependencyInjection;
 using AspNetCore.EventLog.Exceptions;
 using AspNetCore.EventLog.Infrastructure;
-using AspNetCore.EventLog.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace AspNetCore.EventLog.Services
 {
-    public class EventLogService: IEventLogService
+    class EventLogService: IEventLogService
     {
 
-        private readonly IServiceProvider _serviceProvider;
         private readonly EventLogStoreOptions _options;
         private readonly ILogger<EventLogService> _logger;
+        private readonly IEventBus _eventBus;
 
 
 
-        public EventLogService(IServiceProvider provider, IOptions<EventLogStoreOptions> options, ILogger<EventLogService> logger)
+        public EventLogService(IOptions<EventLogStoreOptions> options, ILogger<EventLogService> logger, IEventBus eventBus)
         {
-            _serviceProvider = provider;
             _logger = logger;
+            _eventBus = eventBus;
             _options = options.Value;
         }
 
@@ -36,53 +34,49 @@ namespace AspNetCore.EventLog.Services
         protected EventLogDbContext Context;
 
 
-        public Task SaveEventAsync(object @event, DbTransaction transaction, Guid transactionId)
+        public Task SaveEventAsync(IntegrationEvent @event, DbTransaction transaction, Guid transactionId)
         {
             if(transaction == null)
                 throw new ArgumentNullException(nameof(transaction));
 
             CreateConnection(transaction.Connection);
 
-            var entry = new EventLog().CreateEventLog(@event, transactionId, _options.JsonSettings);
+            var entry = EventLog.CreateEventLog(@event, transactionId, _options.JsonSettings);
 
             Context.Database.UseTransaction(transaction);
-            Context.EventLogs.Add(entry);
+            Context.Published.Add(entry);
 
             return Context.SaveChangesAsync();
 
         }
 
 
-        public Task SaveEventsAsync(IEnumerable<object> events, DbTransaction transaction, Guid transactionId)
+        public Task SaveEventsAsync(IEnumerable<IntegrationEvent> events, DbTransaction transaction, Guid transactionId)
         {
             if (transaction == null)
                 throw new ArgumentNullException(nameof(transaction));
 
             CreateConnection(transaction.Connection);
 
-            var entries = events.Select(@event => new EventLog().CreateEventLog(@event, transactionId, _options.JsonSettings));
+            var entries = events.Select(@event => EventLog.CreateEventLog(@event, transactionId, _options.JsonSettings));
 
 
             Context.Database.UseTransaction(transaction);
-            Context.EventLogs.AddRange(entries);
+            Context.Published.AddRange(entries);
 
             return Context.SaveChangesAsync();
         }
 
 
 
-        public async Task DispatchByTransactionId(DbConnection connection, Guid transactionId)
+        public async Task DispatchByPublisher(DbConnection connection, string publisher)
         {
-            var dispatcher = _serviceProvider.GetService<IEventDispatcher>();
-
-            if (dispatcher == null)
-                throw new ArgumentNullException(nameof(dispatcher));
 
             CreateConnection(connection);
 
 
             // get all not published events by transactionId
-            var pending = await GetPendingByTransactionId(transactionId);
+            var pending = await GetPendingByPublisher(publisher);
 
             if (!pending.Any())
                 return;
@@ -94,23 +88,14 @@ namespace AspNetCore.EventLog.Services
                     // set as in progress
                     await SetEventState(eventLog.Id, EventState.InProgress);
 
-                    // get the event assembly
-                    var assembly = Assembly.Load(eventLog.EventAssemblyName);
-
-                    // get type by description
-                    var type = assembly.GetType(eventLog.EventTypeName, true);
-
-                    // deserialize to type
-                    var @event = JsonConvert.DeserializeObject(eventLog.Content, type);
-
-                    await dispatcher.Dispatch(@event);
+                    _eventBus.Publish(eventLog.EventName, eventLog.Content);
 
                     await SetEventState(eventLog.Id, EventState.Published);
 
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Dispatch failed for event of type {eventLog.EventTypeName} due to {ex.Message}");
+                    _logger.LogError($"Dispatch failed for event {eventLog.Id} of type {eventLog.EventName} due to {ex.Message}");
 
                     await SetEventState(eventLog.Id, EventState.PublishedFailed);
 
@@ -133,10 +118,10 @@ namespace AspNetCore.EventLog.Services
 
 
 
-        private Task<List<EventLog>> GetPendingByTransactionId(Guid transactionId)
+        private Task<List<EventLog>> GetPendingByPublisher(string publisher)
         {
 
-            return Context.EventLogs.Where(e => e.TransactionId == transactionId && e.EventState == EventState.NotPublished).ToListAsync();
+            return Context.Published.Where(e => e.PublisherName == publisher && e.EventState == EventState.NotPublished).ToListAsync();
 
         }
 

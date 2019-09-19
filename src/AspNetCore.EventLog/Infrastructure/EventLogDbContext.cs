@@ -17,7 +17,7 @@ namespace AspNetCore.EventLog.Infrastructure
         }
 
 
-        public DbSet<EventLog> EventLogs { get; set; }
+        public DbSet<EventLog> Published { get; set; }
 
 
 
@@ -33,23 +33,23 @@ namespace AspNetCore.EventLog.Infrastructure
             // event log table settings
             var entity = builder.Entity<EventLog>();
 
-            entity.HasKey(l => l.Id);
+            entity.ToTable("EventLog_Published");
 
-            entity.Property(l => l.TransactionId).IsRequired();
+            entity.HasKey(l => l.Id);
 
             entity.HasIndex(l => l.CreationTime);
 
-            entity.HasIndex(l => l.TransactionId);
+            entity.HasIndex(l => l.PublisherName);
+
+            entity.Property(l => l.PublisherName).IsRequired().HasMaxLength(150);
+
+            entity.Property(l => l.EventName).IsRequired().HasMaxLength(50);
 
             entity.Property(l => l.Content).HasColumnType("json").IsRequired();
 
             entity.Property(l => l.CreationTime).IsRequired();
 
             entity.Property(l => l.EventState).IsRequired().IsConcurrencyToken();
-
-            entity.Property(l => l.EventAssemblyName).HasMaxLength(100).IsRequired();
-
-            entity.Property(l => l.EventTypeName).HasMaxLength(350).IsRequired();
 
 
         }

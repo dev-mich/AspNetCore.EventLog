@@ -13,3 +13,4 @@ deploy:
   script: dotnet nuget push src/AspNetCore.EventLog/bin/Release/AspNetCore.EventLog.*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
   on:
     branch: master
+    tags: true
