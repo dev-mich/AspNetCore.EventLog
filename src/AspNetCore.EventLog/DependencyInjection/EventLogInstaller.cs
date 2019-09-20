@@ -1,6 +1,5 @@
 ﻿using System;
 using AspNetCore.EventLog.Services;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.EventLog.DependencyInjection
@@ -19,22 +18,6 @@ namespace AspNetCore.EventLog.DependencyInjection
 
         }
 
-
-
-
-        public static void UseEventLog(this IApplicationBuilder app)
-        {
-
-            //using (var scope = app.ApplicationServices.CreateScope())
-            //{
-
-            //    var storeOptions = scope.ServiceProvider.GetRequiredService<IOptions<EventLogStoreOptions>>();
-
-            //    var context = new EventLogDbContext(storeOptions.Value.ContextFactory.Invoke(),)
-
-            //}
-
-        }
 
 
     }

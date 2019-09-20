@@ -1,10 +1,9 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.Event;
 using Newtonsoft.Json;
 
-namespace AspNetCore.EventLog
+namespace AspNetCore.EventLog.Entities
 {
-    public class EventLog
+    public class Published
     {
 
         public Guid Id { get; set; }
@@ -25,11 +24,13 @@ namespace AspNetCore.EventLog
         public EventState EventState { get; set; }
 
 
-        public static EventLog CreateEventLog(IntegrationEvent @event, Guid transactionId, JsonSerializerSettings settings)
+        public static Published CreateEventLog(string publisherName, string eventName, object @event, JsonSerializerSettings settings)
         {
-            return new EventLog
+            return new Published
             {
                 Id = Guid.NewGuid(),
+                PublisherName = publisherName,
+                EventName = eventName,
                 Content = JsonConvert.SerializeObject(@event, settings),
                 CreationTime = DateTime.UtcNow,
                 EventState = EventState.NotPublished
