@@ -6,7 +6,7 @@ namespace AspNetCore.EventLog.Abstractions.EventHandling
 
         void Publish(string eventName, string content);
 
-        void Subscribe(string eventName);
+        void Subscribe<TEvent>(string eventName);
 
     }
 }

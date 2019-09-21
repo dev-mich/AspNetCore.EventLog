@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore.EventLog.Abstractions\AspNetCore.EventLog.Abstractions.csproj" />
+    <ProjectReference Include="..\AspNetCore.EventLog.Core\AspNetCore.EventLog.Core.csproj" />
     <ProjectReference Include="..\AspNetCore.EventLog.Entities\AspNetCore.EventLog.Entities.csproj" />
   </ItemGroup>
 

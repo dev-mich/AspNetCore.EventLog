@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Text;
 using AspNetCore.EventLog.Abstractions.EventHandling;
-using AspNetCore.EventLog.RabbitMQ.Config;
+using AspNetCore.EventLog.RabbitMQ.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace AspNetCore.EventLog.RabbitMQ
 {
     public class RabbitMqEventBus : IEventBus, IDisposable
     {
 
-        private readonly ILogger<RabbitMqEventBus> _logger;
-        private readonly RabbitMqConfiguration _options;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IConnectionFactory _connectionFactory;
+        private readonly IExchangeResolver _exchangeResolver;
 
         private IConnection _connection;
         private IModel _channel;
         private int _recoveryFailedCount;
 
-        public RabbitMqEventBus(ILogger<RabbitMqEventBus> logger, IOptions<RabbitMqConfiguration> options, IServiceProvider serviceProvider)
+        public RabbitMqEventBus(IServiceProvider serviceProvider, IConnectionFactory rabbitMqConnectionFactory, IExchangeResolver exchangeResolver)
         {
-            _logger = logger;
-            _options = options.Value;
+            _serviceProvider = serviceProvider;
+            _connectionFactory = rabbitMqConnectionFactory;
+            _exchangeResolver = exchangeResolver;
+            _recoveryFailedCount = 0;
 
             InitRabbitMq();
         }
@@ -30,67 +32,81 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         public void Publish(string eventName, string content)
         {
+            if (string.IsNullOrEmpty(eventName))
+                throw new ArgumentNullException(nameof(eventName));
+
+            if (string.IsNullOrEmpty(content))
+                throw new ArgumentNullException(nameof(content));
 
             var body = Encoding.UTF8.GetBytes(content);
 
-            _channel.BasicPublish(_options.ExchangeName, eventName, basicProperties: null, body: body);
+            // resolve exchange name
+            var exchangeName = _exchangeResolver.ResolveExchange(eventName);
+
+            if (string.IsNullOrEmpty(exchangeName))
+                throw new ArgumentNullException(nameof(exchangeName));
+
+            // passive declare exchange to ensure that exist
+            _channel.ExchangeDeclarePassive(exchangeName);
+
+            _channel.BasicPublish(exchangeName, eventName, basicProperties: null, body: body);
 
         }
 
-        public void Subscribe(string eventName)
+        public void Subscribe<TEvent>(string eventName)
         {
-            _channel.QueueBind(_options.QueueName, _options.ExchangeName, eventName);
+            if (string.IsNullOrEmpty(eventName))
+                throw new ArgumentNullException(nameof(eventName));
+
+            var queueResolver = _serviceProvider.GetRequiredService<IQueueResolver>();
+
+            // resolve queue name
+            var queueName = queueResolver.ResolveQueue(eventName);
+
+            if (string.IsNullOrEmpty(queueName))
+                throw new ArgumentNullException(nameof(queueName));
+
+            var queue = _channel.QueueDeclarePassive(queueName);
+
+            // resolve exchange name
+            var exchangeName = _exchangeResolver.ResolveExchange(eventName);
+
+            if (string.IsNullOrEmpty(exchangeName))
+                throw new ArgumentNullException(nameof(exchangeName));
+
+            _channel.QueueBind(queueName, exchangeName, eventName);
         }
 
 
         private void InitRabbitMq()
         {
-            var factory = new ConnectionFactory
-            {
-                HostName = _options.HostName,
-                Port = _options.Port,
-                UserName = _options.Username,
-                Password = _options.Password,
-                DispatchConsumersAsync = true
-            };
+
 
             // create connection
-            _connection = factory.CreateConnection();
+            _connection = _connectionFactory.CreateConnection();
 
             _connection.ConnectionShutdown += (sender, args) =>
             {
-                _logger.LogCritical("connection with rabbitmq shutdown");
+                Log(LogLevel.Critical, "connection with rabbitmq shutdown");
             };
 
             _connection.RecoverySucceeded += (sender, args) =>
             {
-                _logger.LogInformation("connection with rabbitmq recovered");
+                _recoveryFailedCount = 0;
+                Log(LogLevel.Information, "connection with rabbitmq recovered");
             };
 
             _connection.ConnectionRecoveryError += (sender, args) =>
             {
                 _recoveryFailedCount += 1;
 
-                _logger.LogError($"connection recovery error nr {_recoveryFailedCount} of 10");
+                Log(LogLevel.Error, $"connection recovery error nr {_recoveryFailedCount} of 10");
 
             };
 
-            // create channel
             _channel = _connection.CreateModel();
 
-            _channel.ExchangeDeclare(_options.ExchangeName, ExchangeType.Topic);
 
-            if (!string.IsNullOrEmpty(_options.QueueName))
-            {
-                _channel.QueueDeclare(_options.QueueName, durable: true, exclusive: false, autoDelete: false);
-
-                var consumer = new AsyncEventingBasicConsumer(_channel);
-                // consumer.Received += Consumer_Received;
-
-                _channel.BasicConsume(_options.QueueName, false, consumer);
-
-                _logger.LogInformation("rabbitmq subscriber start");
-            }
         }
 
         //private async Task Consumer_Received(object sender, BasicDeliverEventArgs @event)
@@ -136,6 +152,15 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         //}
 
+
+
+
+        private void Log(LogLevel level, string message)
+        {
+            var logger = _serviceProvider.GetService<ILogger<RabbitMqEventBus>>();
+
+            logger?.Log(level, message);
+        }
 
 
         public void Dispose()

@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <Version>1.0.2</Version>
     <Company>Udressy</Company>
     <Description>Simple persistence based multipurpose event logging</Description>
@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore.EventLog.Abstractions\AspNetCore.EventLog.Abstractions.csproj" />
+    <ProjectReference Include="..\AspNetCore.EventLog.Core\AspNetCore.EventLog.Core.csproj" />
   </ItemGroup>
 
 </Project>

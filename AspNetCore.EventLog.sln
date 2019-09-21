@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29020.237
-MinimumVisualStudioVersion = 15.0.26124.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog", "src\AspNetCore.EventLog\AspNetCore.EventLog.csproj", "{CFDD3750-7A9A-4551-82B5-6818772E7226}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94C1609A-2377-4625-903C-132BD348688E}"
@@ -17,11 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog.FakeApi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog.IntegrationTest", "test\AspNetCore.EventLog.IntegrationTest\AspNetCore.EventLog.IntegrationTest.csproj", "{9B82AD93-463E-4342-A1C5-52F85596E436}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.EventLog.Entities", "src\AspNetCore.EventLog.Entities\AspNetCore.EventLog.Entities.csproj", "{2137CBF4-163F-4C4A-AC7E-5DF21850BFAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog.Entities", "src\AspNetCore.EventLog.Entities\AspNetCore.EventLog.Entities.csproj", "{2137CBF4-163F-4C4A-AC7E-5DF21850BFAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.EventLog.PostgreSQL", "src\AspNetCore.EventLog.PostgreSQL\AspNetCore.EventLog.PostgreSQL.csproj", "{72EF85F9-AC06-40E1-A825-25A5EEEFC2A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog.PostgreSQL", "src\AspNetCore.EventLog.PostgreSQL\AspNetCore.EventLog.PostgreSQL.csproj", "{72EF85F9-AC06-40E1-A825-25A5EEEFC2A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.EventLog.Core", "src\AspNetCore.EventLog.Core\AspNetCore.EventLog.Core.csproj", "{0679D195-91D5-4CCE-B0F8-E259E893C5CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog.Core", "src\AspNetCore.EventLog.Core\AspNetCore.EventLog.Core.csproj", "{0679D195-91D5-4CCE-B0F8-E259E893C5CD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.EventLog.EventBus.Test", "test\AspNetCore.EventLog.EventBus.Test\AspNetCore.EventLog.EventBus.Test.csproj", "{9A4AA348-6E3C-43A1-9F77-335F4EF02608}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,18 @@ Global
 		{0679D195-91D5-4CCE-B0F8-E259E893C5CD}.Release|x64.Build.0 = Release|Any CPU
 		{0679D195-91D5-4CCE-B0F8-E259E893C5CD}.Release|x86.ActiveCfg = Release|Any CPU
 		{0679D195-91D5-4CCE-B0F8-E259E893C5CD}.Release|x86.Build.0 = Release|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Debug|x64.Build.0 = Debug|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Debug|x86.Build.0 = Debug|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Release|x64.ActiveCfg = Release|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Release|x64.Build.0 = Release|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Release|x86.ActiveCfg = Release|Any CPU
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +156,7 @@ Global
 		{2137CBF4-163F-4C4A-AC7E-5DF21850BFAC} = {94C1609A-2377-4625-903C-132BD348688E}
 		{72EF85F9-AC06-40E1-A825-25A5EEEFC2A3} = {94C1609A-2377-4625-903C-132BD348688E}
 		{0679D195-91D5-4CCE-B0F8-E259E893C5CD} = {94C1609A-2377-4625-903C-132BD348688E}
+		{9A4AA348-6E3C-43A1-9F77-335F4EF02608} = {88D7082B-9E06-4739-AA0E-ABCA6B7FA7C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2622969C-DAFB-4A8E-A2B0-7B29EC9F1C17}

@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace AspNetCore.EventLog.RabbitMQ.Config
 {
     public class RabbitMqConfiguration
@@ -15,6 +16,12 @@ namespace AspNetCore.EventLog.RabbitMQ.Config
         public string ExchangeName { get; set; }
 
         public string QueueName { get; set; }
+
+        public Type ExchangeResolver { get; set; }
+
+        public Type QueueResolver { get; set; }
+
+        public Type ConsumerResolver { get; set; }
 
     }
 }

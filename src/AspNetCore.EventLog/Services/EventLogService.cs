@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Abstractions.EventHandling;
 using AspNetCore.EventLog.Abstractions.Persistence;
-using AspNetCore.EventLog.DependencyInjection;
+using AspNetCore.EventLog.Core.Configuration;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Exceptions;
 using Microsoft.Extensions.Logging;
@@ -16,14 +16,14 @@ namespace AspNetCore.EventLog.Services
     class EventLogService: IEventLogService
     {
 
-        private readonly EventLogStoreOptions _options;
+        private readonly EventLogOptions _options;
         private readonly ILogger<EventLogService> _logger;
         private readonly IEventBus _eventBus;
         private readonly IPublishedStore _publishedStore;
 
 
 
-        public EventLogService(IOptions<EventLogStoreOptions> options, ILogger<EventLogService> logger, IEventBus eventBus)
+        public EventLogService(IOptions<EventLogOptions> options, ILogger<EventLogService> logger, IEventBus eventBus)
         {
             _logger = logger;
             _eventBus = eventBus;
