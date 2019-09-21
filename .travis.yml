@@ -6,11 +6,11 @@ dotnet: 2.2
 script:
 - dotnet restore --no-cache
 - dotnet build -c Release --no-restore
-- dotnet pack -c Release
+- dotnet pack
 deploy:
   skip_cleanup: true
   provider: script
-  script: dotnet nuget push src/AspNetCore.EventLog/bin/Release/AspNetCore.EventLog.*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
+  script: dotnet nuget push *.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
   on:
     branch: master
     tags: true

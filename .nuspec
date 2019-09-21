@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-    <metadata>
-        <id>AspNetCore.EventLog</id>
-        <version>2.0</version>
-        <description>Integration events management designed for a microservices environment, designed for work with multiple persistence provders and multiple event bus</description>
-        <authors></authors>
-    </metadata>
-    <!-- Optional 'files' node -->
+	<metadata>
+		<id>AspNetCore.EventLog</id>
+		<version>2.0</version>
+		<description>Integration events management designed for a microservices environment, designed for work with multiple persistence provders and multiple event bus</description>
+		<authors>Giacomo Michelon</authors>
+	</metadata>
+	<files>
+		<file src="src/AspNetCore.EventLog/bin/Release/netcoreapp2.2/AspNetCore.EventLog.dll" target="lib/netcoreapp2.2"></file>
+		<file src="src/AspNetCore.EventLog.Abstractions/bin/Release/netstandard2.0/AspNetCore.EventLog.Abstractions.dll" target="lib/netstandard2.0"></file>
+		<file src="src/AspNetCore.EventLog.Core/bin/Release/netcoreapp2.2/AspNetCore.EventLog.Core.dll" target="lib/netcoreapp2.2"></file>
+		<file src="src/AspNetCore.EventLog.Entities/bin/Release/netstandard2.0/AspNetCore.EventLog.Entities.dll" target="lib/netstandard2.0"></file>
+		<file src="src/AspNetCore.EventLog.PostgreSQL/bin/Release/netcoreapp2.2/AspNetCore.EventLog.PostgreSQL.dll" target="lib/netcoreapp2.2"></file>
+		<file src="src/AspNetCore.EventLog.RabbitMQ/bin/Release/netcoreapp2.2/AspNetCore.EventLog.RabbitMQ.dll" target="lib/netcoreapp2.2"></file>
+	</files>
 </package>
