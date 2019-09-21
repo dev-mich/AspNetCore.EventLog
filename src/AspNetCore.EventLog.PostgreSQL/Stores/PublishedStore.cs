@@ -16,12 +16,12 @@ namespace AspNetCore.EventLog.PostgreSQL.Stores
         public PublishedStore(PostgresDbContext context): base(context) { }
 
 
-        public Task<List<Published>> GetPendingByPublisher(string publisher)
+        public Task<List<Published>> GetPendingByTransaction(Guid transactionId)
         {
-            return DbSet.Where(e => e.PublisherName == publisher && e.EventState == EventState.NotPublished).ToListAsync();
+            return DbSet.Where(e => e.TransactionId == transactionId && e.EventState == PublishedState.NotPublished).ToListAsync();
         }
 
-        public async Task SetEventState(Guid id, EventState state)
+        public async Task SetEventState(Guid id, PublishedState state)
         {
             var @event = await DbSet.FindAsync(id);
 

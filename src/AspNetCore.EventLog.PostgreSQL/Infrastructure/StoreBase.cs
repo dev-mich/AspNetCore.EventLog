@@ -70,6 +70,11 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
         }
 
+        public Task<TEntity> FindAsync(object id)
+        {
+            return DbSet.FindAsync(id);
+        }
+
         public void UseTransaction(DbTransaction transaction)
         {
             _context.Database.UseTransaction(transaction);

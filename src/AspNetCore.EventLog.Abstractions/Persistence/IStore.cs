@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace AspNetCore.EventLog.Abstractions.Persistence
         Task<bool> AddAsync(IEnumerable<T> entity);
 
         Task<bool> UpdateAsync(T entity);
+
+        Task<T> FindAsync(object id);
 
     }
 }

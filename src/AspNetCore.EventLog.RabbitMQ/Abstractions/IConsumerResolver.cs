@@ -1,11 +1,12 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace AspNetCore.EventLog.RabbitMQ.Abstractions
 {
     public interface IConsumerResolver
     {
 
-        IAsyncBasicConsumer ResolveConsumer(string eventName);
+        Func<string, Task<bool>> ResolveConsumer(string eventName);
 
     }
 }

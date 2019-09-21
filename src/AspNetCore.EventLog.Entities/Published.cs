@@ -9,7 +9,7 @@ namespace AspNetCore.EventLog.Entities
         public Guid Id { get; set; }
 
 
-        public string PublisherName { get; set; }
+        public Guid TransactionId { get; set; }
 
 
         public string EventName { get; set; }
@@ -21,19 +21,19 @@ namespace AspNetCore.EventLog.Entities
         public DateTime CreationTime { get; set; }
 
 
-        public EventState EventState { get; set; }
+        public PublishedState EventState { get; set; }
 
 
-        public static Published CreateEventLog(string publisherName, string eventName, object @event, JsonSerializerSettings settings)
+        public static Published CreateEventLog(Guid transactionId, string eventName, object @event, JsonSerializerSettings settings)
         {
             return new Published
             {
                 Id = Guid.NewGuid(),
-                PublisherName = publisherName,
+                TransactionId = transactionId,
                 EventName = eventName,
                 Content = JsonConvert.SerializeObject(@event, settings),
                 CreationTime = DateTime.UtcNow,
-                EventState = EventState.NotPublished
+                EventState = PublishedState.NotPublished
             };
 
         }
@@ -41,7 +41,7 @@ namespace AspNetCore.EventLog.Entities
     }
 
 
-    public enum EventState
+    public enum PublishedState
     {
         NotPublished = 1,
         InProgress,

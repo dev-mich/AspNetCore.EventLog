@@ -16,9 +16,9 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 
             builder.HasIndex(l => l.CreationTime);
 
-            builder.HasIndex(l => l.PublisherName);
+            builder.HasIndex(l => l.TransactionId);
 
-            builder.Property(l => l.PublisherName).IsRequired().HasMaxLength(150);
+            builder.Property(l => l.TransactionId).IsRequired().HasMaxLength(40);
 
             builder.Property(l => l.EventName).IsRequired().HasMaxLength(50);
 
@@ -26,7 +26,9 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 
             builder.Property(l => l.CreationTime).IsRequired();
 
-            builder.Property(l => l.EventState).IsRequired().IsConcurrencyToken();
+            builder.Property(l => l.EventState).IsRequired();
+
+            builder.ForNpgsqlUseXminAsConcurrencyToken();
 
         }
     }

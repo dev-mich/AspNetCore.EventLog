@@ -2,14 +2,10 @@
 using AspNetCore.EventLog.Abstractions.EventHandling;
 using Xunit;
 
-namespace AspNetCore.EventLog.EventBus.Test.EventHandling
+namespace AspNetCore.EventLog.EventBus.Test.Publish
 {
     public abstract class PublishTest
     {
-
-        protected PublishTest()
-        {
-        }
 
         protected abstract IEventBus InitEventBus();
 

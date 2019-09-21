@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using AspNetCore.EventLog.Abstractions.EventHandling;
+using AspNetCore.EventLog.Abstractions.Persistence;
+using AspNetCore.EventLog.Core.Exceptions;
+using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace AspNetCore.EventLog.RabbitMQ
 {
@@ -53,12 +59,13 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         }
 
-        public void Subscribe<TEvent>(string eventName)
+        public void Subscribe<TEvent>(string eventName) where TEvent : IIntegrationEvent
         {
             if (string.IsNullOrEmpty(eventName))
                 throw new ArgumentNullException(nameof(eventName));
 
             var queueResolver = _serviceProvider.GetRequiredService<IQueueResolver>();
+            var consumerResolver = _serviceProvider.GetRequiredService<IConsumerResolver>();
 
             // resolve queue name
             var queueName = queueResolver.ResolveQueue(eventName);
@@ -66,7 +73,7 @@ namespace AspNetCore.EventLog.RabbitMQ
             if (string.IsNullOrEmpty(queueName))
                 throw new ArgumentNullException(nameof(queueName));
 
-            var queue = _channel.QueueDeclarePassive(queueName);
+            _channel.QueueDeclarePassive(queueName);
 
             // resolve exchange name
             var exchangeName = _exchangeResolver.ResolveExchange(eventName);
@@ -75,8 +82,80 @@ namespace AspNetCore.EventLog.RabbitMQ
                 throw new ArgumentNullException(nameof(exchangeName));
 
             _channel.QueueBind(queueName, exchangeName, eventName);
+
+
+            // resolve consumer
+            var consumer = consumerResolver.ResolveConsumer(eventName);
+
+            if (consumer == null)
+                throw new ArgumentNullException(nameof(consumer));
+
+            var mqConsumer = new AsyncEventingBasicConsumer(_channel);
+
+            mqConsumer.Received += (sender, @event) => Consume(@event, consumer);
+
+
         }
 
+        private async Task Consume(BasicDeliverEventArgs @event, Func<string, Task<bool>> consumer)
+        {
+            var store = _serviceProvider.GetRequiredService<IReceivedStore>();
+
+            Received storedEvent = null;
+
+            try
+            {
+                var content = Encoding.UTF8.GetString(@event.Body);
+
+                var baseJsonContent = JsonConvert.DeserializeObject<IIntegrationEvent>(content);
+
+                // try to get event by id
+                storedEvent = new Received(baseJsonContent.Id, @event.RoutingKey, content);
+
+                // persist received event
+                if (!(await store.AddAsync(storedEvent)))
+                    throw new ReceivedEventNotPersistedException(@event.RoutingKey);
+
+                // call consumer
+                var success = await consumer(content);
+
+                if (success)
+                {
+                    _channel.BasicAck(@event.DeliveryTag, false);
+                    storedEvent.EventState = ReceivedState.Consumed;
+                }
+                else
+                {
+                    storedEvent.EventState = ReceivedState.Rejected;
+                    _channel.BasicReject(@event.DeliveryTag, false);
+                }
+
+                await store.UpdateAsync(storedEvent);
+
+            }
+            catch (ReceivedEventNotPersistedException)
+            {
+                _channel.BasicReject(@event.DeliveryTag, true);
+
+                throw;
+            }
+            catch (Exception)
+            {
+                // consume failed but the event is stored in EventLog, so ack rabbitmq and wait for internal retry policy
+                if (storedEvent != null)
+                {
+                    storedEvent.RetryCount = 1;
+                    storedEvent.EventState = ReceivedState.ConsumeFailed;
+
+                    await store.UpdateAsync(storedEvent);
+                }
+
+                _channel.BasicAck(@event.DeliveryTag, false);
+
+                throw;
+            }
+
+        }
 
         private void InitRabbitMq()
         {
@@ -108,50 +187,6 @@ namespace AspNetCore.EventLog.RabbitMQ
 
 
         }
-
-        //private async Task Consumer_Received(object sender, BasicDeliverEventArgs @event)
-        //{
-        //    var content = Encoding.UTF8.GetString(@event.Body);
-
-        //    _logger.LogInformation($"message received {content} with routing key {@event.RoutingKey}");
-
-        //    try
-        //    {
-
-        //        using (var scope = _serviceProvider.CreateScope())
-        //        {
-        //            // resolve command type
-        //            var subsManager = scope.ServiceProvider.GetRequiredService<IEnumerable<IEventHandler>>();
-
-        //            var handler = subsManager.FirstOrDefault(s => s.GetEventName().Equals(@event.RoutingKey));
-
-        //            if (handler == null)
-        //                throw new ArgumentNullException(nameof(handler));
-
-        //            await handler.Handle(content);
-
-        //            _channel.BasicAck(@event.DeliveryTag, false);
-        //        }
-
-        //    }
-        //    catch (ValidationException ex)
-        //    {
-        //        var error = ex.Errors.FirstOrDefault();
-
-        //        _logger.LogError($"message was invalid and will be rejected, error: {error?.ErrorMessage ?? "unknown"}");
-
-        //        _channel.BasicReject(@event.DeliveryTag, false);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"message handler failed, requeue, error: {ex.Message}");
-
-        //        _channel.BasicReject(@event.DeliveryTag, true);
-        //    }
-
-
-        //}
-
 
 
 

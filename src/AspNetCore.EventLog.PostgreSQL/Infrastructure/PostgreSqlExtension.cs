@@ -1,4 +1,5 @@
-﻿using AspNetCore.EventLog.Abstractions.DependencyInjection;
+﻿using System.Reflection;
+using AspNetCore.EventLog.Abstractions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +19,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
         {
             services.AddEntityFrameworkNpgsql().AddDbContext<PostgresDbContext>(opts =>
             {
-                opts.UseNpgsql(_connectionString);
+                opts.UseNpgsql(_connectionString, n => n.MigrationsAssembly(Assembly.GetAssembly(typeof(PostgresDbContext)).FullName));
             });
         }
     }

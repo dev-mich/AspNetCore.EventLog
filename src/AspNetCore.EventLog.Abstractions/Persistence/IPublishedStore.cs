@@ -7,9 +7,9 @@ namespace AspNetCore.EventLog.Abstractions.Persistence
 {
     public interface IPublishedStore : IStore<Published>
     {
-        Task<List<Published>> GetPendingByPublisher(string publisher);
+        Task<List<Published>> GetPendingByTransaction(Guid transactionId);
 
-        Task SetEventState(Guid id, EventState state);
+        Task SetEventState(Guid id, PublishedState state);
 
     }
 }

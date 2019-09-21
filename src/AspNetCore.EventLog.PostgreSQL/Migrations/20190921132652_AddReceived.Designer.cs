@@ -3,15 +3,17 @@ using System;
 using AspNetCore.EventLog.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AspNetCore.EventLog.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresDbContext))]
-    partial class PostgresDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190921132652_AddReceived")]
+    partial class AddReceived
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,15 +36,11 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
-                    b.Property<int>("EventState");
+                    b.Property<int>("EventState")
+                        .IsConcurrencyToken();
 
                     b.Property<Guid>("TransactionId")
                         .HasMaxLength(40);
-
-                    b.Property<uint>("xmin")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid");
 
                     b.HasKey("Id");
 
@@ -70,13 +68,6 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<DateTime>("ReceivedTime");
-
-                    b.Property<int>("RetryCount");
-
-                    b.Property<uint>("xmin")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid");
 
                     b.HasKey("Id");
 
