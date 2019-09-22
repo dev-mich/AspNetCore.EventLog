@@ -1,6 +1,5 @@
 ﻿using AspNetCore.EventLog.Abstractions.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
     {
         private readonly PostgresDbContext _context;
 
-        public StoreBase(PostgresDbContext context)
+        protected StoreBase(PostgresDbContext context)
         {
             _context = context;
             DbSet = context.Set<TEntity>();
@@ -22,51 +21,24 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
         public async Task<bool> AddAsync(TEntity entity)
         {
-            try
-            {
-                await DbSet.AddAsync(entity);
+            await DbSet.AddAsync(entity);
 
-                await SaveChanges();
-
-                return true;
-            }
-            catch(Exception)
-            {
-                return false;
-            }
+            return await SaveChanges();
         }
 
         public async Task<bool> AddAsync(IEnumerable<TEntity> entity)
         {
-            try
-            {
-                await DbSet.AddRangeAsync(entity);
+            await DbSet.AddRangeAsync(entity);
 
-                await SaveChanges();
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return await SaveChanges();
         }
 
         public async Task<bool> UpdateAsync(TEntity entity)
         {
-            try
-            {
-                DbSet.Update(entity);
-                _context.Entry(entity).State = EntityState.Modified;
+            DbSet.Update(entity);
+            _context.Entry(entity).State = EntityState.Modified;
 
-                await SaveChanges();
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return await SaveChanges();
 
         }
 

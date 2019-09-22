@@ -40,6 +40,7 @@ namespace AspNetCore.EventLog.Entities
     public enum ReceivedState
     {
         Received = 1,
+        InProgress,
         Consumed,
         ConsumeFailed,
         Rejected

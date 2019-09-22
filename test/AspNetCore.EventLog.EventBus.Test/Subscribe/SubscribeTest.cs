@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using AspNetCore.EventLog.Abstractions.EventHandling;
 using Xunit;
 
@@ -17,8 +15,8 @@ namespace AspNetCore.EventLog.EventBus.Test.Subscribe
 
             var bus = InitEventBus();
 
-            Assert.Throws<ArgumentNullException>(() => bus.Publish(null, "aa"));
-            Assert.Throws<ArgumentNullException>(() => bus.Publish("", "aa"));
+            Assert.Throws<ArgumentNullException>(() => bus.Subscribe<IIntegrationEvent>(null));
+            Assert.Throws<ArgumentNullException>(() => bus.Subscribe<IIntegrationEvent>(""));
 
         }
 

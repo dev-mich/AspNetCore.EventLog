@@ -1,8 +1,8 @@
 ﻿using System;
 using AspNetCore.EventLog.Abstractions.EventHandling;
 using AspNetCore.EventLog.EventBus.Test.Fixtures;
+using AspNetCore.EventLog.EventBus.Test.Utils;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -23,31 +23,26 @@ namespace AspNetCore.EventLog.EventBus.Test.Subscribe
         }
 
 
+
+        [Fact]
+        public void TestUnresolvedExchange()
+        {
+            fixture.ExchangeResolverMock.Setup(x => x.ResolveExchange(It.IsAny<string>())).Returns((string)null);
+
+            Assert.Throws<ArgumentNullException>(() => fixture.RabbitMq.Subscribe<IIntegrationEvent>("event"));
+        }
+
+
         [Fact]
         public void TestUnresolvedQueue()
         {
+            fixture.ExchangeResolverMock.Setup(x => x.ResolveExchange(It.IsAny<string>())).Returns("exchange");
 
             var queueResolverMock = new Mock<IQueueResolver>();
 
             queueResolverMock.Setup(s => s.ResolveQueue(It.IsAny<string>())).Returns((string) null);
 
-            fixture.ServiceProviderMock = new Mock<IServiceProvider>();
-            fixture.ServiceProviderMock
-                .Setup(x => x.GetService(typeof(IQueueResolver)))
-                .Returns(queueResolverMock);
-
-            var serviceScope = new Mock<IServiceScope>();
-            serviceScope.Setup(x => x.ServiceProvider).Returns(fixture.ServiceProviderMock.Object);
-
-            var serviceScopeFactory = new Mock<IServiceScopeFactory>();
-            serviceScopeFactory
-                .Setup(x => x.CreateScope())
-                .Returns(serviceScope.Object);
-
-            fixture.ServiceProviderMock
-                .Setup(x => x.GetService(typeof(IServiceScopeFactory)))
-                .Returns(serviceScopeFactory.Object);
-
+            fixture.ServiceProviderMock.ResolveService<IQueueResolver>(queueResolverMock);
 
             Assert.Throws<ArgumentNullException>(() => fixture.RabbitMq.Subscribe<IIntegrationEvent>(It.IsAny<string>()));
 

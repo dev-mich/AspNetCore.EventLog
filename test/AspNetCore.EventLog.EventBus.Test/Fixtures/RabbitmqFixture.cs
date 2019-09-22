@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 namespace AspNetCore.EventLog.EventBus.Test.Fixtures
 {
-    public class RabbitMQFixture
+    public class RabbitMQFixture : IDisposable
     {
 
         public Mock<IExchangeResolver> ExchangeResolverMock;
@@ -14,6 +14,12 @@ namespace AspNetCore.EventLog.EventBus.Test.Fixtures
         public RabbitMqEventBus RabbitMq;
 
         public RabbitMQFixture()
+        {
+            InitRabbitMQ();
+        }
+
+
+        private void InitRabbitMQ()
         {
             ServiceProviderMock = new Mock<IServiceProvider>();
             var connectionFactoryMock = new Mock<IConnectionFactory>();
@@ -24,5 +30,10 @@ namespace AspNetCore.EventLog.EventBus.Test.Fixtures
             RabbitMq = new RabbitMqEventBus(ServiceProviderMock.Object, connectionFactoryMock.Object, ExchangeResolverMock.Object);
         }
 
+
+        public void Dispose()
+        {
+            InitRabbitMQ();
+        }
     }
 }

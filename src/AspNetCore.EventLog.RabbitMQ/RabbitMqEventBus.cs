@@ -64,8 +64,14 @@ namespace AspNetCore.EventLog.RabbitMQ
             if (string.IsNullOrEmpty(eventName))
                 throw new ArgumentNullException(nameof(eventName));
 
+
+            // resolve exchange name
+            var exchangeName = _exchangeResolver.ResolveExchange(eventName);
+
+            if (string.IsNullOrEmpty(exchangeName))
+                throw new ArgumentNullException(nameof(exchangeName));
+
             var queueResolver = _serviceProvider.GetRequiredService<IQueueResolver>();
-            var consumerResolver = _serviceProvider.GetRequiredService<IConsumerResolver>();
 
             // resolve queue name
             var queueName = queueResolver.ResolveQueue(eventName);
@@ -75,33 +81,20 @@ namespace AspNetCore.EventLog.RabbitMQ
 
             _channel.QueueDeclarePassive(queueName);
 
-            // resolve exchange name
-            var exchangeName = _exchangeResolver.ResolveExchange(eventName);
-
-            if (string.IsNullOrEmpty(exchangeName))
-                throw new ArgumentNullException(nameof(exchangeName));
-
             _channel.QueueBind(queueName, exchangeName, eventName);
-
-
-            // resolve consumer
-            var consumer = consumerResolver.ResolveConsumer(eventName);
-
-            if (consumer == null)
-                throw new ArgumentNullException(nameof(consumer));
 
             var mqConsumer = new AsyncEventingBasicConsumer(_channel);
 
-            mqConsumer.Received += (sender, @event) => Consume(@event, consumer);
+            mqConsumer.Received += Consume;
 
 
         }
 
-        private async Task Consume(BasicDeliverEventArgs @event, Func<string, Task<bool>> consumer)
-        {
-            var store = _serviceProvider.GetRequiredService<IReceivedStore>();
 
-            Received storedEvent = null;
+        private async Task Consume(object sender, BasicDeliverEventArgs @event)
+        {
+
+            var processor = _serviceProvider.GetRequiredService<IMessageProcessor>();
 
             try
             {
@@ -109,53 +102,33 @@ namespace AspNetCore.EventLog.RabbitMQ
 
                 var baseJsonContent = JsonConvert.DeserializeObject<IIntegrationEvent>(content);
 
-                // try to get event by id
-                storedEvent = new Received(baseJsonContent.Id, @event.RoutingKey, content);
+                await processor.PersistEvent(baseJsonContent.Id, @event.RoutingKey, content);
 
-                // persist received event
-                if (!(await store.AddAsync(storedEvent)))
-                    throw new ReceivedEventNotPersistedException(@event.RoutingKey);
+                // event is persisted, ack the message
+                _channel.BasicAck(@event.DeliveryTag, false);
 
-                // call consumer
-                var success = await consumer(content);
+                // consume
+                await processor.Process(@event.RoutingKey, content);
 
-                if (success)
-                {
-                    _channel.BasicAck(@event.DeliveryTag, false);
-                    storedEvent.EventState = ReceivedState.Consumed;
-                }
-                else
-                {
-                    storedEvent.EventState = ReceivedState.Rejected;
-                    _channel.BasicReject(@event.DeliveryTag, false);
-                }
-
-                await store.UpdateAsync(storedEvent);
-
+            }
+            catch (ReceivedEventAlreadyPersistedException)
+            {
+                // event is already stored, ack message
+                _channel.BasicAck(@event.DeliveryTag, false);
             }
             catch (ReceivedEventNotPersistedException)
             {
+                // reject event and ask for requeue
                 _channel.BasicReject(@event.DeliveryTag, true);
-
-                throw;
             }
-            catch (Exception)
+            catch (ArgumentNullException)
             {
-                // consume failed but the event is stored in EventLog, so ack rabbitmq and wait for internal retry policy
-                if (storedEvent != null)
-                {
-                    storedEvent.RetryCount = 1;
-                    storedEvent.EventState = ReceivedState.ConsumeFailed;
-
-                    await store.UpdateAsync(storedEvent);
-                }
-
-                _channel.BasicAck(@event.DeliveryTag, false);
-
-                throw;
+                // consumer not resolved, reject message
+                _channel.BasicReject(@event.DeliveryTag, false);
             }
 
         }
+
 
         private void InitRabbitMq()
         {
