@@ -1,6 +1,7 @@
 ﻿using System;
 using AspNetCore.EventLog.Core.Configuration;
 using AspNetCore.EventLog.Services;
+using AspNetCore.EventLog.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.EventLog.DependencyInjection
@@ -16,6 +17,8 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.Configure(setupOptions);
 
             services.AddTransient<IEventLogService, EventLogService>();
+
+            services.AddHostedService<MigratorTask>();
 
             var options = new EventLogOptions();
             setupOptions(options);

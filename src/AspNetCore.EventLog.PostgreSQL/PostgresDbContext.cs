@@ -24,12 +24,12 @@ namespace AspNetCore.EventLog.PostgreSQL
 
             base.OnModelCreating(builder);
 
+            builder.ApplyConfiguration(new PublishedEntityConfiguration(_options.DefaultSchema));
+            builder.ApplyConfiguration(new ReceivedEntityConfiguration(_options.DefaultSchema));
+
+
             if (!string.IsNullOrEmpty(_options.DefaultSchema))
                 builder.HasDefaultSchema(_options.DefaultSchema);
-
-            builder.ApplyConfiguration(new PublishedEntityConfiguration());
-            builder.ApplyConfiguration(new ReceivedEntityConfiguration());
-
         }
 
     }

@@ -7,10 +7,17 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 {
     class PublishedEntityConfiguration : IEntityTypeConfiguration<Published>
     {
+        private readonly string _schema;
+
+        public PublishedEntityConfiguration(string schema)
+        {
+            _schema = schema;
+        }
+
         public void Configure(EntityTypeBuilder<Published> builder)
         {
 
-            builder.ToTable("EventLog_Published");
+            builder.ToTable("EventLog_Published", _schema);
 
             builder.HasKey(l => l.Id);
 

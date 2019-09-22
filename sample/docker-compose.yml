@@ -1,0 +1,33 @@
+version: '3.4'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5438:5432"
+    networks:
+      - udressy
+  eventbus:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - udressy
+  aspnetcore.eventlog.sample1:
+    image: aspnetcoreeventlogsample1
+    build:
+      context: .
+      dockerfile: AspNetCore.EventLog.Sample1/Dockerfile
+    depends_on:
+      - db
+      - eventbus
+    networks:
+      - udressy
+networks:
+  udressy:

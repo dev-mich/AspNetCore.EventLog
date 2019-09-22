@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using AspNetCore.EventLog.Abstractions.DependencyInjection;
+using AspNetCore.EventLog.Abstractions.Persistence;
 using AspNetCore.EventLog.PostgreSQL.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,8 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
             {
                 opts.UseNpgsql(options.ConnectionString, n => n.MigrationsAssembly(Assembly.GetAssembly(typeof(PostgresDbContext)).FullName));
             });
+
+            services.AddTransient<IDbMigrator, PostgreSQLMigrator>();
         }
     }
 }

@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+ARG BUILD_CONFIGURATION=Debug
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+EXPOSE 80
+
+WORKDIR /src
+COPY ["sample/AspNetCore.EventLog.Sample1/AspNetCore.EventLog.Sample1.csproj", "sample/AspNetCore.EventLog.Sample1/"]
+
+RUN dotnet restore "sample/AspNetCore.EventLog.Sample1/AspNetCore.EventLog.Sample1.csproj"
+COPY . .
+WORKDIR "/src/sample/AspNetCore.EventLog.Sample1"
+RUN dotnet build --no-restore "AspNetCore.EventLog.Sample1.csproj" -c $BUILD_CONFIGURATION
+
+RUN echo "exec dotnet run --no-build --no-launch-profile -c $BUILD_CONFIGURATION --" > /entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]

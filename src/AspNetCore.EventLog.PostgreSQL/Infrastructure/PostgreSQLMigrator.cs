@@ -1,4 +1,5 @@
-﻿using AspNetCore.EventLog.Abstractions.Persistence;
+﻿using System;
+using AspNetCore.EventLog.Abstractions.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -15,7 +16,16 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
         public Task MigrateAsync()
         {
-            return _context.Database.MigrateAsync();
+            try
+            {
+                return _context.Database.MigrateAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
         }
     }
 }

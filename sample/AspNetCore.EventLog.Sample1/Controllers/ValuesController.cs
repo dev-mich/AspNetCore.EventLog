@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AspNetCore.EventLog.FakeApi.Controllers
+namespace AspNetCore.EventLog.Sample1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
