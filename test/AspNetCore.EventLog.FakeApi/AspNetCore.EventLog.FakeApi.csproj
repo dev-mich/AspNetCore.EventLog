@@ -12,4 +12,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.4.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AspNetCore.EventLog.PostgreSQL\AspNetCore.EventLog.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.EventLog.RabbitMQ\AspNetCore.EventLog.RabbitMQ.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.EventLog\AspNetCore.EventLog.csproj" />
+  </ItemGroup>
+
 </Project>

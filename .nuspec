@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>AspNetCore.EventLog</id>
-		<version>2.0</version>
+		<version>2.0.0</version>
 		<description>Integration events management designed for a microservices environment, designed for work with multiple persistence provders and multiple event bus</description>
 		<authors>Giacomo Michelon</authors>
 	</metadata>
