@@ -6,6 +6,7 @@ dotnet: 2.2
 script:
 - dotnet restore --no-cache
 - dotnet build -c Release --no-restore
+- dotnet test
 - dotnet pack
 deploy:
   skip_cleanup: true

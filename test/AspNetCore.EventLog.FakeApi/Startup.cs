@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCore.EventLog.DependencyInjection;
+using AspNetCore.EventLog.PostgreSQL.Extensions;
+using AspNetCore.EventLog.RabbitMQ.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
