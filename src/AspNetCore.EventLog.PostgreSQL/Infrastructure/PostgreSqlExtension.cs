@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Reflection;
 using AspNetCore.EventLog.Abstractions.DependencyInjection;
 using AspNetCore.EventLog.Abstractions.Persistence;
 using AspNetCore.EventLog.PostgreSQL.Configuration;
 using AspNetCore.EventLog.PostgreSQL.Stores;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 {
@@ -30,6 +26,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
             services.AddEntityFrameworkNpgsql();
 
+            services.AddTransient<DbContextFactory>();
             services.AddTransient<IDbMigrator, PostgreSQLMigrator>();
 
 

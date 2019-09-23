@@ -19,6 +19,7 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.AddTransient<IEventLogService, EventLogService>();
 
             services.AddHostedService<MigratorTask>();
+            services.AddHostedService<RetryFailedTask>();
 
             var options = new EventLogOptions();
             setupOptions(options);

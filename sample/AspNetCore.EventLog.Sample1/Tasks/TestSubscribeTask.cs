@@ -18,6 +18,7 @@ namespace AspNetCore.EventLog.Sample1.Tasks
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _eventBus.Subscribe<TestIntegrationEvent>("test.event");
+            _eventBus.Subscribe<TestIntegrationEvent>("test.event.failed");
 
             return Task.CompletedTask;
         }

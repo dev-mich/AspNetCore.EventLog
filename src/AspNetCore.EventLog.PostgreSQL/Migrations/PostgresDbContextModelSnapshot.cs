@@ -58,6 +58,12 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<uint>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnName("xmin")
+                        .HasColumnType("xid");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("json");
@@ -72,11 +78,6 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
                     b.Property<DateTime>("ReceivedTime");
 
                     b.Property<int>("RetryCount");
-
-                    b.Property<uint>("xmin")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("xid");
 
                     b.HasKey("Id");
 

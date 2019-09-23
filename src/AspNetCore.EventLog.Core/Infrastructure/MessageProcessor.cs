@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Abstractions.EventHandling;
 using AspNetCore.EventLog.Abstractions.Persistence;
@@ -76,6 +75,13 @@ namespace AspNetCore.EventLog.Core.Infrastructure
             }
         }
 
+        public Task<bool> Process(Received @event)
+        {
+            _storedEvent = @event;
+
+            return Process(@event.EventName, @event.Content);
+        }
+
 
         private Task PersistEvent()
         {
@@ -96,6 +102,10 @@ namespace AspNetCore.EventLog.Core.Infrastructure
             try
             {
                 _storedEvent.EventState = state;
+
+                if (state == ReceivedState.ConsumeFailed)
+                    _storedEvent.RetryCount += 1;
+
                 return _receivedStore.UpdateAsync(_storedEvent);
             }
             catch (Exception ex)

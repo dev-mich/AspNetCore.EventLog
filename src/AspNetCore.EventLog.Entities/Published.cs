@@ -24,6 +24,9 @@ namespace AspNetCore.EventLog.Entities
         public PublishedState EventState { get; set; }
 
 
+        public uint ConcurrencyToken { get; set; }
+
+
         public static Published CreateEventLog(Guid transactionId, string eventName, object @event, JsonSerializerSettings settings)
         {
             return new Published

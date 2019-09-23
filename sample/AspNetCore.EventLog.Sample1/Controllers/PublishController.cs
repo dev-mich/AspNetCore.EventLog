@@ -28,6 +28,7 @@ namespace AspNetCore.EventLog.Sample1.Controllers
             var transaction = _context.Database.BeginTransaction();
 
             await _eventLog.SaveEventAsync(transaction.TransactionId, "test.event", new TestIntegrationEvent(), transaction.GetDbTransaction());
+            await _eventLog.SaveEventAsync(transaction.TransactionId, "test.event.failed", new TestIntegrationEvent(), transaction.GetDbTransaction());
 
             transaction.Commit();
 

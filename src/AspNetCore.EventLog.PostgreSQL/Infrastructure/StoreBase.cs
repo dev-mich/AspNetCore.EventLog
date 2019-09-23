@@ -1,7 +1,5 @@
 ﻿using AspNetCore.EventLog.Abstractions.Persistence;
-using AspNetCore.EventLog.PostgreSQL.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -10,15 +8,16 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 {
     internal abstract class StoreBase<TEntity> : IStore<TEntity> where TEntity: class
     {
-        private readonly PostgreSqlOptions _options;
-        private PostgresDbContext _context;
+        private readonly DbContextFactory _contextFactory;
+        private PostgresDbContext _context => _contextFactory.Context;
 
-        protected StoreBase(IOptions<PostgreSqlOptions> options)
+        protected StoreBase(DbContextFactory contextFactory)
         {
-            _options = options.Value;
+            _contextFactory = contextFactory;
         }
 
-        protected DbSet<TEntity> DbSet { get; private set; }
+        private DbSet<TEntity> _dbSet;
+        protected DbSet<TEntity> DbSet => _dbSet ?? (_dbSet = _context.Set<TEntity>());
 
 
         public async Task<bool> AddAsync(TEntity entity)
@@ -38,7 +37,6 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
         public async Task<bool> UpdateAsync(TEntity entity)
         {
             DbSet.Update(entity);
-            _context.Entry(entity).State = EntityState.Modified;
 
             return await SaveChanges();
 
@@ -51,9 +49,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
         public void UseTransaction(DbTransaction transaction)
         {
-            _context = new PostgresDbContext(transaction.Connection, _options);
-            DbSet = _context.Set<TEntity>();
-            _context.Database.UseTransaction(transaction);
+            _contextFactory.UseTransaction(transaction);
         }
 
 

@@ -7,18 +7,18 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 {
     class PostgreSQLMigrator : IDbMigrator
     {
-        private readonly PostgresDbContext _context;
+        private readonly DbContextFactory _contextFactory;
 
-        public PostgreSQLMigrator(PostgresDbContext context)
+        public PostgreSQLMigrator(DbContextFactory contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public Task MigrateAsync()
         {
             try
             {
-                return _context.Database.MigrateAsync();
+                return _contextFactory.Context.Database.MigrateAsync();
             }
             catch (Exception ex)
             {

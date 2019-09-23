@@ -22,12 +22,12 @@ namespace AspNetCore.EventLog.Tasks
             if (stoppingToken.IsCancellationRequested)
                 return;
 
-            //using (var scope = _scopeFactory.CreateScope())
-            //{
-            //    var migrator = scope.ServiceProvider.GetRequiredService<IDbMigrator>();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var migrator = scope.ServiceProvider.GetRequiredService<IDbMigrator>();
 
-            //    await migrator.MigrateAsync();
-            //}
+                await migrator.MigrateAsync();
+            }
 
 
         }

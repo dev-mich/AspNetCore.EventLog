@@ -23,6 +23,9 @@ namespace AspNetCore.EventLog.Entities
         public int RetryCount { get; set; }
 
 
+        public uint ConcurrencyToken { get; set; }
+
+
         public Received(Guid id, string eventName, string content)
         {
             Id = id;

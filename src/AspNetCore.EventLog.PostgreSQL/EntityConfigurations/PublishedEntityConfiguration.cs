@@ -28,7 +28,11 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 
             builder.Property(l => l.EventState).IsRequired();
 
-            builder.ForNpgsqlUseXminAsConcurrencyToken();
+            builder.Property(x => x.ConcurrencyToken)
+                .HasColumnName("xmin")
+                .HasColumnType("xid")
+                .ValueGeneratedOnAddOrUpdate()
+                .IsConcurrencyToken();
 
         }
     }
