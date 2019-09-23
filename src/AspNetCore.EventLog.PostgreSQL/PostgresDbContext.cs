@@ -8,28 +8,30 @@ namespace AspNetCore.EventLog.PostgreSQL
 {
     public class PostgresDbContext: DbContext
     {
-        private readonly PostgreSqlOptions _options;
+        private readonly string _schema;
 
         public PostgresDbContext(DbContextOptions<PostgresDbContext> options, IOptions<PostgreSqlOptions> setupOptions) : base(options)
         {
-            _options = setupOptions.Value;
+            _schema = setupOptions.Value.DefaultSchema;
         }
 
         public DbSet<Published> Published { get; set; }
 
         public DbSet<Received> Received { get; set; }
 
+        public string Schema => _schema;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
 
             base.OnModelCreating(builder);
 
-            builder.ApplyConfiguration(new PublishedEntityConfiguration(_options.DefaultSchema));
-            builder.ApplyConfiguration(new ReceivedEntityConfiguration(_options.DefaultSchema));
+            builder.ApplyConfiguration(new PublishedEntityConfiguration());
+            builder.ApplyConfiguration(new ReceivedEntityConfiguration());
 
 
-            if (!string.IsNullOrEmpty(_options.DefaultSchema))
-                builder.HasDefaultSchema(_options.DefaultSchema);
+            if (!string.IsNullOrEmpty(_schema))
+                builder.HasDefaultSchema(_schema);
         }
 
     }

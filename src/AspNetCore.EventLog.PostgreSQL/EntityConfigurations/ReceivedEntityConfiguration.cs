@@ -7,17 +7,11 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 {
     class ReceivedEntityConfiguration : IEntityTypeConfiguration<Received>
     {
-        private readonly string _schema;
-
-        public ReceivedEntityConfiguration(string schema)
-        {
-            _schema = schema;
-        }
 
         public void Configure(EntityTypeBuilder<Received> builder)
         {
 
-            builder.ToTable("EventLog_Received", _schema);
+            builder.ToTable("EventLog_Received");
 
             builder.HasKey(l => l.Id);
 

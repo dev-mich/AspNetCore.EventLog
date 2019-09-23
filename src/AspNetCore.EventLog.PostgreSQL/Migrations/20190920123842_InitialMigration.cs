@@ -5,9 +5,19 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
 {
     public partial class InitialMigration : Migration
     {
+        private readonly string _schema;
+
+        public InitialMigration(string schema)
+        {
+            _schema = schema;
+        }
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(_schema);
+
             migrationBuilder.CreateTable(
+                schema: _schema,
                 name: "EventLog_Published",
                 columns: table => new
                 {
@@ -26,18 +36,20 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_EventLog_Published_CreationTime",
                 table: "EventLog_Published",
-                column: "CreationTime");
+                column: "CreationTime",
+                schema: _schema);
 
             migrationBuilder.CreateIndex(
                 name: "IX_EventLog_Published_PublisherName",
                 table: "EventLog_Published",
-                column: "PublisherName");
+                column: "PublisherName",
+                schema: _schema);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EventLog_Published");
+                name: "EventLog_Published", schema: _schema);
         }
     }
 }

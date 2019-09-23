@@ -5,9 +5,18 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
 {
     public partial class AddReceived : Migration
     {
+        private readonly string _schema;
+
+        public AddReceived(string schema)
+        {
+            _schema = schema;
+        }
+
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                schema: _schema,
                 name: "EventLog_Received",
                 columns: table => new
                 {
@@ -25,13 +34,14 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_EventLog_Received_ReceivedTime",
                 table: "EventLog_Received",
-                column: "ReceivedTime");
+                column: "ReceivedTime",
+                schema: _schema);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EventLog_Received");
+                name: "EventLog_Received", schema: _schema);
         }
     }
 }
