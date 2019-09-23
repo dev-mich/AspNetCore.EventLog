@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Abstractions.EventHandling;
@@ -87,6 +88,7 @@ namespace AspNetCore.EventLog.RabbitMQ
 
             mqConsumer.Received += Consume;
 
+            _channel.BasicConsume(queueName, false, mqConsumer);
 
         }
 
@@ -100,9 +102,14 @@ namespace AspNetCore.EventLog.RabbitMQ
             {
                 var content = Encoding.UTF8.GetString(@event.Body);
 
-                var baseJsonContent = JsonConvert.DeserializeObject<IIntegrationEvent>(content);
+                var baseJsonContent = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
 
-                await processor.PersistEvent(baseJsonContent.Id, @event.RoutingKey, content);
+                var id = GetId(baseJsonContent);
+
+                if (!id.HasValue)
+                    throw new ArgumentNullException(nameof(id));
+
+                await processor.PersistEvent(id.Value, @event.RoutingKey, content);
 
                 // event is persisted, ack the message
                 _channel.BasicAck(@event.DeliveryTag, false);
@@ -123,7 +130,6 @@ namespace AspNetCore.EventLog.RabbitMQ
             }
             catch (ArgumentNullException)
             {
-                // consumer not resolved, reject message
                 _channel.BasicReject(@event.DeliveryTag, false);
             }
 
@@ -168,6 +174,15 @@ namespace AspNetCore.EventLog.RabbitMQ
             var logger = _serviceProvider.GetService<ILogger<RabbitMqEventBus>>();
 
             logger?.Log(level, message);
+        }
+
+
+        private Guid? GetId(Dictionary<string, object> @event)
+        {
+            if (@event.TryGetValue("Id", out object id))
+                return Guid.Parse(id.ToString());
+
+            return null;
         }
 
 

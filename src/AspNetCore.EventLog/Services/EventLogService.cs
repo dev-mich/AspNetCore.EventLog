@@ -23,11 +23,12 @@ namespace AspNetCore.EventLog.Services
 
 
 
-        public EventLogService(IOptions<EventLogOptions> options, ILogger<EventLogService> logger, IEventBus eventBus)
+        public EventLogService(IOptions<EventLogOptions> options, ILogger<EventLogService> logger, IEventBus eventBus, IPublishedStore publishedStore)
         {
             _logger = logger;
             _eventBus = eventBus;
             _options = options.Value;
+            _publishedStore = publishedStore;
         }
 
 

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 {
@@ -10,11 +11,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
         public PostgresDbContext CreateDbContext(string[] args)
         {
 
-            var optionsBuilder = new DbContextOptionsBuilder<PostgresDbContext>();
-
-            optionsBuilder.UseNpgsql("design_time");
-
-            return new PostgresDbContext(optionsBuilder.Options, new OptionsWrapper<PostgreSqlOptions>(new PostgreSqlOptions()));
+            return new PostgresDbContext(new NpgsqlConnection(), new PostgreSqlOptions());
 
         }
     }

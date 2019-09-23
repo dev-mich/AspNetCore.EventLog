@@ -27,6 +27,17 @@ services:
     depends_on:
       - db
       - eventbus
+    ports:
+      - "8080:80"
+    networks:
+      - udressy
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=giacomo.m@centropaghe.it
+      - PGADMIN_DEFAULT_PASSWORD=giacomo
+    ports:
+      - "5439:80"
     networks:
       - udressy
 networks:
