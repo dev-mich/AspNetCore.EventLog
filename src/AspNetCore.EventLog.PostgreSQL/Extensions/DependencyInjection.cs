@@ -1,5 +1,5 @@
 ﻿using System;
-using AspNetCore.EventLog.Core.Configuration;
+using AspNetCore.EventLog.Configuration;
 using AspNetCore.EventLog.PostgreSQL.Configuration;
 using AspNetCore.EventLog.PostgreSQL.Infrastructure;
 

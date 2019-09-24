@@ -1,6 +1,6 @@
 ﻿
 
-namespace AspNetCore.EventLog.Abstractions.EventHandling
+namespace AspNetCore.EventLog.Interfaces
 {
     public interface IEventBus
     {

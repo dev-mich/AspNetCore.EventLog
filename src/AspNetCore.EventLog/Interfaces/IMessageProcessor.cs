@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 
-namespace AspNetCore.EventLog.Abstractions.EventHandling
+namespace AspNetCore.EventLog.Interfaces
 {
     public interface IMessageProcessor
     {

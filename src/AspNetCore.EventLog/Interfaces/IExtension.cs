@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AspNetCore.EventLog.Abstractions.DependencyInjection
+namespace AspNetCore.EventLog.Interfaces
 {
     public interface IExtension
     {

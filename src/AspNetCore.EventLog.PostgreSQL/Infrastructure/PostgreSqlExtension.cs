@@ -1,6 +1,5 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.DependencyInjection;
-using AspNetCore.EventLog.Abstractions.Persistence;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.PostgreSQL.Configuration;
 using AspNetCore.EventLog.PostgreSQL.Stores;
 using Microsoft.Extensions.DependencyInjection;

@@ -2,7 +2,7 @@
 using System.Data.Common;
 using System.Threading.Tasks;
 
-namespace AspNetCore.EventLog.Abstractions.Persistence
+namespace AspNetCore.EventLog.Interfaces
 {
     public interface IStore<T>
     {

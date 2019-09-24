@@ -1,6 +1,5 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.DependencyInjection;
-using AspNetCore.EventLog.Abstractions.EventHandling;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 using AspNetCore.EventLog.RabbitMQ.Config;
 using Microsoft.Extensions.DependencyInjection;

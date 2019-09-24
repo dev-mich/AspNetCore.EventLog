@@ -15,9 +15,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AspNetCore.EventLog.Abstractions\AspNetCore.EventLog.Abstractions.csproj" />
-    <ProjectReference Include="..\AspNetCore.EventLog.Core\AspNetCore.EventLog.Core.csproj" />
-  </ItemGroup>
-
 </Project>

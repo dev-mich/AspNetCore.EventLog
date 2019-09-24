@@ -1,7 +1,7 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using AspNetCore.EventLog.Interfaces;
 
 namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 {

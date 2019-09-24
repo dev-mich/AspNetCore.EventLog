@@ -1,7 +1,7 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.EventHandling;
 using AspNetCore.EventLog.EventBus.Test.Fixtures;
 using AspNetCore.EventLog.EventBus.Test.Utils;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 using Moq;
 using Xunit;

@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.EventHandling;
-using AspNetCore.EventLog.Abstractions.Persistence;
-using AspNetCore.EventLog.Core.Exceptions;
 using AspNetCore.EventLog.Entities;
+using AspNetCore.EventLog.Exceptions;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

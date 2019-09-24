@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.EventHandling;
-using AspNetCore.EventLog.Abstractions.Persistence;
-using AspNetCore.EventLog.Core.Configuration;
+using AspNetCore.EventLog.Configuration;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Exceptions;
+using AspNetCore.EventLog.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

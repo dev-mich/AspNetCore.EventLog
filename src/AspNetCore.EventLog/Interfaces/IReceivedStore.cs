@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 
-namespace AspNetCore.EventLog.Abstractions.Persistence
+namespace AspNetCore.EventLog.Interfaces
 {
     public interface IReceivedStore : IStore<Received>
     {

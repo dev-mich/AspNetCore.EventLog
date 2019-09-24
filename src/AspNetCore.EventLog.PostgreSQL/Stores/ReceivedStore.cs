@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.Persistence;
 using AspNetCore.EventLog.Entities;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.PostgreSQL.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 

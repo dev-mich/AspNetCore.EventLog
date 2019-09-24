@@ -1,5 +1,5 @@
-﻿using AspNetCore.EventLog.Abstractions.EventHandling;
-using System;
+﻿using System;
+using AspNetCore.EventLog.Interfaces;
 
 namespace AspNetCore.EventLog.Sample1.IntegrationEvents
 {

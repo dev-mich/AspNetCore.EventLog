@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using AspNetCore.EventLog.Abstractions.DependencyInjection;
+using AspNetCore.EventLog.Interfaces;
 using Newtonsoft.Json;
 
-namespace AspNetCore.EventLog.Core.Configuration
+namespace AspNetCore.EventLog.Configuration
 {
     public class EventLogOptions
     {

@@ -1,6 +1,6 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.EventHandling;
 using AspNetCore.EventLog.EventBus.Test.Fixtures;
+using AspNetCore.EventLog.Interfaces;
 using Moq;
 using Xunit;
 

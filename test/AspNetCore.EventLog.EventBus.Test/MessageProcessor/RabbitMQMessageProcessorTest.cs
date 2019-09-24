@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.EventHandling;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 using AspNetCore.EventLog.RabbitMQ.Infrastructure;
 using Moq;

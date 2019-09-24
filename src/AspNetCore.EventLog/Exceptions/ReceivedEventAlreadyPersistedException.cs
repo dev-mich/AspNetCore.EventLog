@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCore.EventLog.Core.Exceptions
+namespace AspNetCore.EventLog.Exceptions
 {
     public class ReceivedEventAlreadyPersistedException : Exception
     {

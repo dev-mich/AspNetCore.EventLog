@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.Persistence;
-using AspNetCore.EventLog.Core.Infrastructure;
+using AspNetCore.EventLog.Infrastructure;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 
 namespace AspNetCore.EventLog.RabbitMQ.Infrastructure

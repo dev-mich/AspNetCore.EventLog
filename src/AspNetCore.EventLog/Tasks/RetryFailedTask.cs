@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.EventHandling;
-using AspNetCore.EventLog.Abstractions.Persistence;
+using AspNetCore.EventLog.Interfaces;
 using Microsoft.Extensions.Hosting;
 
 namespace AspNetCore.EventLog.Tasks

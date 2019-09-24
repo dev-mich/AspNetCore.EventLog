@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Abstractions.EventHandling;
-using AspNetCore.EventLog.Abstractions.Persistence;
-using AspNetCore.EventLog.Core.Exceptions;
 using AspNetCore.EventLog.Entities;
+using AspNetCore.EventLog.Exceptions;
+using AspNetCore.EventLog.Interfaces;
 
-namespace AspNetCore.EventLog.Core.Infrastructure
+namespace AspNetCore.EventLog.Infrastructure
 {
     public abstract class MessageProcessor : IMessageProcessor
     {

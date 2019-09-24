@@ -1,5 +1,5 @@
 ﻿using System;
-using AspNetCore.EventLog.Abstractions.EventHandling;
+using AspNetCore.EventLog.Interfaces;
 using Xunit;
 
 namespace AspNetCore.EventLog.EventBus.Test.Subscribe
