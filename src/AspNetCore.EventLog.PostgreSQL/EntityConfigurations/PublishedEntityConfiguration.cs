@@ -16,10 +16,6 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 
             builder.HasIndex(l => l.CreationTime);
 
-            builder.HasIndex(l => l.TransactionId);
-
-            builder.Property(l => l.TransactionId).IsRequired().HasMaxLength(40);
-
             builder.Property(l => l.EventName).IsRequired().HasMaxLength(50);
 
             builder.Property(l => l.Content).HasColumnType("json").IsRequired();

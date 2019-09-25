@@ -9,15 +9,15 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
     internal abstract class StoreBase<TEntity> : IStore<TEntity> where TEntity: class
     {
         private readonly DbContextFactory _contextFactory;
-        private PostgresDbContext _context => _contextFactory.Context;
 
         protected StoreBase(DbContextFactory contextFactory)
         {
             _contextFactory = contextFactory;
         }
 
+        protected PostgresDbContext Context => _contextFactory.Context;
         private DbSet<TEntity> _dbSet;
-        protected DbSet<TEntity> DbSet => _dbSet ?? (_dbSet = _context.Set<TEntity>());
+        protected DbSet<TEntity> DbSet => _dbSet ?? (_dbSet = Context.Set<TEntity>());
 
 
         public async Task<bool> AddAsync(TEntity entity)
@@ -55,7 +55,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
         protected async Task<bool> SaveChanges()
         {
-            return await _context.SaveChangesAsync() > 0;
+            return await Context.SaveChangesAsync() > 0;
         }
 
     }

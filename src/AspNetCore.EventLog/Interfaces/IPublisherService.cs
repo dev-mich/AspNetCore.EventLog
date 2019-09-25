@@ -1,9 +1,12 @@
 ﻿using System.Threading.Tasks;
+using AspNetCore.EventLog.Infrastructure;
 
 namespace AspNetCore.EventLog.Interfaces
 {
-    interface IPublisherService
+    public interface IPublisherService
     {
-        Task Publish(string eventName, object @event);
+        Task Publish(string eventName, IIntegrationEvent @event);
+
+        void SetTransaction(EventLogTransaction transaction);
     }
 }

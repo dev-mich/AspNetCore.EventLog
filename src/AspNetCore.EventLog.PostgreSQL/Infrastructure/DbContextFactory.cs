@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Data.Common;
+using System.Reflection;
 using AspNetCore.EventLog.PostgreSQL.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 
 namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 {
@@ -36,18 +39,24 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
                 var optionBuilder = new DbContextOptionsBuilder<PostgresDbContext>();
 
+                void NpgsqlOptions(NpgsqlDbContextOptionsBuilder opts)
+                {
+                    opts.MigrationsAssembly(Assembly.GetAssembly(typeof(PostgresDbContext)).FullName);
+                    opts.MigrationsHistoryTable("__EventLogMigrationHistory", _setupOptions.Value.DefaultSchema);
+                }
+
                 if (_currentTransaction != null)
                 {
-                    optionBuilder.UseNpgsql(_currentTransaction.Connection);
-
-                    _context = new PostgresDbContext(optionBuilder.Options, _setupOptions);
+                    optionBuilder.UseNpgsql(_currentTransaction.Connection, NpgsqlOptions);
                 }
                 else
                 {
-                    optionBuilder.UseNpgsql(_setupOptions.Value.ConnectionString);
-
-                    _context = new PostgresDbContext(optionBuilder.Options, _setupOptions);
+                    optionBuilder.UseNpgsql(_setupOptions.Value.ConnectionString, NpgsqlOptions);
                 }
+
+                optionBuilder.ReplaceService<IMigrationsAssembly, SchemaAwareMigrationAssembly>();
+
+                _context = new PostgresDbContext(optionBuilder.Options, _setupOptions);
 
                 return _context;
 

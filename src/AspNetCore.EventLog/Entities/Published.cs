@@ -1,5 +1,4 @@
 ﻿using System;
-using Newtonsoft.Json;
 
 namespace AspNetCore.EventLog.Entities
 {
@@ -7,10 +6,6 @@ namespace AspNetCore.EventLog.Entities
     {
 
         public Guid Id { get; set; }
-
-
-        public Guid TransactionId { get; set; }
-
 
         public string EventName { get; set; }
 
@@ -27,14 +22,13 @@ namespace AspNetCore.EventLog.Entities
         public uint ConcurrencyToken { get; set; }
 
 
-        public static Published CreateEventLog(Guid transactionId, string eventName, object @event, JsonSerializerSettings settings)
+        public static Published CreateEventLog(Guid id, string eventName, string content)
         {
             return new Published
             {
-                Id = Guid.NewGuid(),
-                TransactionId = transactionId,
+                Id = id,
                 EventName = eventName,
-                Content = JsonConvert.SerializeObject(@event, settings),
+                Content = content,
                 CreationTime = DateTime.UtcNow,
                 EventState = PublishedState.NotPublished
             };

@@ -50,7 +50,7 @@ namespace AspNetCore.EventLog.Sample1
                 });
             });
 
-            services.AddHostedService<TestSubscribeTask>();
+            // services.AddHostedService<TestSubscribeTask>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.PostgreSQL.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCore.EventLog.PostgreSQL.Stores
 {
@@ -18,9 +17,9 @@ namespace AspNetCore.EventLog.PostgreSQL.Stores
         }
 
 
-        public Task<List<Published>> GetPendingByTransaction(Guid transactionId)
+        public List<Published> GetPending()
         {
-            return DbSet.Where(e => e.TransactionId == transactionId && e.EventState == PublishedState.NotPublished).ToListAsync();
+            return Context.ChangeTracker.Entries<Published>().Select(c => c.Entity).ToList();
         }
 
         public async Task SetEventState(Guid id, PublishedState state)

@@ -14,11 +14,11 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
             _contextFactory = contextFactory;
         }
 
-        public Task MigrateAsync()
+        public async Task MigrateAsync()
         {
             try
             {
-                return _contextFactory.Context.Database.MigrateAsync();
+                await _contextFactory.Context.Database.MigrateAsync();
             }
             catch (Exception ex)
             {

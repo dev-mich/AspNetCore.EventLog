@@ -7,7 +7,7 @@ namespace AspNetCore.EventLog.Interfaces
 {
     public interface IPublishedStore : IStore<Published>
     {
-        Task<List<Published>> GetPendingByTransaction(Guid transactionId);
+        List<Published> GetPending();
 
         Task SetEventState(Guid id, PublishedState state);
 

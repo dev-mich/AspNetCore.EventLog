@@ -1,5 +1,6 @@
 ﻿using System;
 using AspNetCore.EventLog.Configuration;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.Services;
 using AspNetCore.EventLog.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,7 @@ namespace AspNetCore.EventLog.DependencyInjection
 
             services.Configure(setupOptions);
 
-            services.AddTransient<IEventLogService, EventLogService>();
+            services.AddTransient<IPublisherService, PublisherService>();
 
             services.AddHostedService<MigratorTask>();
             services.AddHostedService<RetryFailedTask>();

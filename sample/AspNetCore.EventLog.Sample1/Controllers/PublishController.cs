@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using AspNetCore.EventLog.Interfaces;
+using AspNetCore.EventLog.PostgreSQL.Extensions;
 using AspNetCore.EventLog.Sample1.Infrastructure;
 using AspNetCore.EventLog.Sample1.IntegrationEvents;
 using AspNetCore.EventLog.Services;
@@ -13,29 +15,29 @@ namespace AspNetCore.EventLog.Sample1.Controllers
     {
 
         private readonly TestDbContext _context;
-        private readonly IEventLogService _eventLog;
+        private readonly IPublisherService _publisherService;
 
-        public PublishController(TestDbContext context, IEventLogService eventLog)
+        public PublishController(TestDbContext context, IPublisherService publisherService)
         {
             _context = context;
-            _eventLog = eventLog;
+            _publisherService = publisherService;
         }
 
 
         [HttpPost]
         public async Task<IActionResult> Post()
         {
-            var transaction = _context.Database.BeginTransaction();
 
-            await _eventLog.SaveEventAsync(transaction.TransactionId, "test.event", new TestIntegrationEvent(), transaction.GetDbTransaction());
-            await _eventLog.SaveEventAsync(transaction.TransactionId, "test.event.failed", new TestIntegrationEvent(), transaction.GetDbTransaction());
+            using (var transaction = _context.Database.BeginTransaction(_publisherService))
+            {
 
-            transaction.Commit();
+                await _publisherService.Publish("test.event", new TestIntegrationEvent());
 
-            await _eventLog.DispatchByPublisher(transaction.GetDbTransaction().Connection, transaction.TransactionId);
+                transaction.Commit();
+
+            }
 
             return Ok();
-
         }
 
 
