@@ -30,7 +30,6 @@ namespace AspNetCore.EventLog.RabbitMQ.Infrastructure
                 DispatchConsumersAsync = true
             });
 
-            services.AddTransient<IMessageProcessor, RabbitMQMessageProcessor>();
 
 
             // ADD RESOLVERS
@@ -46,8 +45,6 @@ namespace AspNetCore.EventLog.RabbitMQ.Infrastructure
             if (_configuration.QueueResolver != null)
                 services.AddSingleton(typeof(IQueueResolver), _configuration.QueueResolver);
 
-            if (_configuration.ConsumerResolver != null)
-                services.AddSingleton(typeof(IConsumerResolver), _configuration.ConsumerResolver);
         }
     }
 }

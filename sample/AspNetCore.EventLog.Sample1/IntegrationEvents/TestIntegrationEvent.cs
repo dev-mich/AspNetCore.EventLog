@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AspNetCore.EventLog.Interfaces;
 
 namespace AspNetCore.EventLog.Sample1.IntegrationEvents
@@ -16,5 +17,15 @@ namespace AspNetCore.EventLog.Sample1.IntegrationEvents
             EventStuff = "test event property bla bla bla";
         }
 
+    }
+
+    public class TestIntegrationEventHandler : IEventHandler<TestIntegrationEvent>
+    {
+        public Task<bool> Handle(TestIntegrationEvent @event)
+        {
+            Console.WriteLine(@event.EventStuff);
+
+            return Task.FromResult(true);
+        }
     }
 }

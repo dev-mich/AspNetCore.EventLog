@@ -7,7 +7,7 @@ namespace AspNetCore.EventLog.Interfaces
 
         void Publish(string eventName, string content);
 
-        void Subscribe<TEvent>(string eventName) where TEvent : IIntegrationEvent;
+        void Subscribe(string eventName);
 
 
     }

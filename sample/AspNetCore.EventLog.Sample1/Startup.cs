@@ -1,10 +1,11 @@
 ﻿using AspNetCore.EventLog.DependencyInjection;
+using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.PostgreSQL.Extensions;
 using AspNetCore.EventLog.RabbitMQ.Config;
 using AspNetCore.EventLog.RabbitMQ.Extensions;
 using AspNetCore.EventLog.Sample1.EventBus;
 using AspNetCore.EventLog.Sample1.Infrastructure;
-using AspNetCore.EventLog.Sample1.Tasks;
+using AspNetCore.EventLog.Sample1.IntegrationEvents;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -45,12 +46,12 @@ namespace AspNetCore.EventLog.Sample1
                     Username = "rabbit",
                     Password = "rabbit",
                     ExchangeResolver = typeof(RabbitMQExchangeResolver),
-                    QueueResolver = typeof(RabbitMQQueueResolver),
-                    ConsumerResolver = typeof(RabbitMQConsumerResolver)
+                    QueueResolver = typeof(RabbitMQQueueResolver)
                 });
             });
 
-            // services.AddHostedService<TestSubscribeTask>();
+            // register integration event handlers
+            services.AddScoped<IEventHandler<TestIntegrationEvent>, TestIntegrationEventHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +68,13 @@ namespace AspNetCore.EventLog.Sample1
             }
 
             app.UseMvc();
+
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var receiverService = scope.ServiceProvider.GetService<IReceiverService>();
+
+                receiverService.Subscribe<TestIntegrationEvent>("test.event");
+            }
         }
     }
 }

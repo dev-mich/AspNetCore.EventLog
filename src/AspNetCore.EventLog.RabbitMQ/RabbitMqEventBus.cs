@@ -23,6 +23,7 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         private IConnection _connection;
         private IModel _channel;
+        private AsyncEventingBasicConsumer mqConsumer;
         private int _recoveryFailedCount;
 
         public RabbitMqEventBus(IServiceProvider serviceProvider, IConnectionFactory rabbitMqConnectionFactory, IExchangeResolver exchangeResolver)
@@ -59,7 +60,7 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         }
 
-        public void Subscribe<TEvent>(string eventName) where TEvent : IIntegrationEvent
+        public void Subscribe(string eventName)
         {
             if (string.IsNullOrEmpty(eventName))
                 throw new ArgumentNullException(nameof(eventName));
@@ -83,10 +84,6 @@ namespace AspNetCore.EventLog.RabbitMQ
 
             _channel.QueueBind(queueName, exchangeName, eventName);
 
-            var mqConsumer = new AsyncEventingBasicConsumer(_channel);
-
-            mqConsumer.Received += Consume;
-
             _channel.BasicConsume(queueName, false, mqConsumer);
 
         }
@@ -108,13 +105,10 @@ namespace AspNetCore.EventLog.RabbitMQ
                 if (!id.HasValue)
                     throw new ArgumentNullException(nameof(id));
 
-                await processor.PersistEvent(id.Value, @event.RoutingKey, content);
+                await processor.Process(id.Value, @event.RoutingKey, content);
 
                 // event is persisted, ack the message
                 _channel.BasicAck(@event.DeliveryTag, false);
-
-                // consume
-                await processor.Process(@event.RoutingKey, content);
 
             }
             catch (ReceivedEventAlreadyPersistedException)
@@ -127,10 +121,7 @@ namespace AspNetCore.EventLog.RabbitMQ
                 // reject event and ask for requeue
                 _channel.BasicReject(@event.DeliveryTag, true);
             }
-            catch (ArgumentNullException)
-            {
-                _channel.BasicReject(@event.DeliveryTag, false);
-            }
+
 
         }
 
@@ -163,6 +154,10 @@ namespace AspNetCore.EventLog.RabbitMQ
 
             _channel = _connection.CreateModel();
 
+
+            mqConsumer = new AsyncEventingBasicConsumer(_channel);
+
+            mqConsumer.Received += Consume;
 
         }
 

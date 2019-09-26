@@ -21,7 +21,5 @@ namespace AspNetCore.EventLog.RabbitMQ.Config
 
         public Type QueueResolver { get; set; }
 
-        public Type ConsumerResolver { get; set; }
-
     }
 }
