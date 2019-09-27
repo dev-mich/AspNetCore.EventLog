@@ -19,12 +19,14 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.Configure(setupOptions);
 
             services.AddTransient<IPublisherService, PublisherService>();
+            services.AddTransient<IReceiverService, ReceiverService>();
 
             services.AddSingleton<IMessageProcessor, MessageProcessor>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddSingleton<SubscriptionManager>();
 
             services.AddHostedService<MigratorTask>();
-            services.AddHostedService<RetryFailedTask>();
+            //services.AddHostedService<RetryFailedTask>();
             services.AddHostedService<ReceivedHandlerTask>();
 
             var options = new EventLogOptions();
