@@ -10,11 +10,15 @@ namespace AspNetCore.EventLog.Interfaces
 
         Task<bool> AddAsync(T entity);
 
+        bool Add(T entity);
+
         Task<bool> AddAsync(IEnumerable<T> entity);
 
         Task<bool> UpdateAsync(T entity);
 
         Task<T> FindAsync(object id);
+
+        T Find(object id);
 
     }
 }

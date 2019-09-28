@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+using AspNetCore.EventLog.Entities;
 
 namespace AspNetCore.EventLog.Interfaces
 {
@@ -9,6 +10,11 @@ namespace AspNetCore.EventLog.Interfaces
 
         void Subscribe(string eventName);
 
+        event EventHandler<Received> OnEventReceived;
+
+        void Commit();
+
+        void Reject();
 
     }
 }

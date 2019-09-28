@@ -5,6 +5,7 @@ using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Infrastructure;
 using AspNetCore.EventLog.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -57,33 +58,46 @@ namespace AspNetCore.EventLog.Tasks
 
                 try
                 {
-                    // set event as in progress
-                    await _receivedStore.SetEventState(received.Id, ReceivedState.InProgress);
 
-                    // resolve subscription
-                    var subscriptionType = _subscriptionManager.ResolveSubscription(received.EventName);
-
-                    var handlerType = typeof(IEventHandler<>);
-
-                    var genericType = handlerType.MakeGenericType(subscriptionType);
-
-                    // resolve handler
-                    var handler = (IEventHandler<IIntegrationEvent>) _serviceProvider.GetService(genericType);
-
-                    if (handler == null)
+                    using (var scope = _serviceProvider.CreateScope())
                     {
-                        throw new ArgumentNullException(nameof(handler));
+
+                        // set event as in progress
+                        await _receivedStore.SetEventState(received.Id, ReceivedState.InProgress);
+
+                        // resolve subscription
+                        var subscriptionType = _subscriptionManager.ResolveSubscription(received.EventName);
+
+                        var handlerType = typeof(IEventHandler<>);
+
+                        var genericType = handlerType.MakeGenericType(subscriptionType);
+
+                        // resolve handler
+                        var handler = scope.ServiceProvider.GetService(genericType);
+
+                        if (handler == null)
+                        {
+                            throw new ArgumentNullException(nameof(handler));
+                        }
+
+                        var methodInfo = handler.GetType().GetMethod("Handle");
+
+                        if (methodInfo == null)
+                        {
+                            throw new ArgumentException(nameof(handler));
+                        }
+
+                        // deserialize content to class
+                        var @event = JsonConvert.DeserializeObject(received.Content, subscriptionType);
+
+                        // call handler
+                        var success = await (Task<bool>) methodInfo.Invoke(handler, new []{ @event });
+
+                        var targetState = success ? ReceivedState.Consumed : ReceivedState.Rejected;
+
+                        await _receivedStore.SetEventState(received.Id, targetState);
                     }
 
-                    // deserialize content to class
-                    var @event = JsonConvert.DeserializeObject(received.Content, subscriptionType);
-
-                    // call handler
-                    var success = await handler.Handle((IIntegrationEvent) @event);
-
-                    var targetState = success ? ReceivedState.Consumed : ReceivedState.Rejected;
-
-                    await _receivedStore.SetEventState(received.Id, targetState);
 
                 }
                 catch (DbUpdateConcurrencyException ex)

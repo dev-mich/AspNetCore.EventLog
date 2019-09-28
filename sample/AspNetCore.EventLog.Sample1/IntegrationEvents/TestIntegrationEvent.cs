@@ -27,5 +27,9 @@ namespace AspNetCore.EventLog.Sample1.IntegrationEvents
 
             return Task.FromResult(true);
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

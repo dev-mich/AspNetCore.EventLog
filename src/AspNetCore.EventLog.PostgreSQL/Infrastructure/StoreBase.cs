@@ -24,21 +24,28 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
         {
             await DbSet.AddAsync(entity);
 
-            return await SaveChanges();
+            return await SaveChangesAsync();
+        }
+
+
+        public bool Add(TEntity entity)
+        {
+            DbSet.Add(entity);
+            return SaveChanges();
         }
 
         public async Task<bool> AddAsync(IEnumerable<TEntity> entity)
         {
             await DbSet.AddRangeAsync(entity);
 
-            return await SaveChanges();
+            return await SaveChangesAsync();
         }
 
         public async Task<bool> UpdateAsync(TEntity entity)
         {
             DbSet.Update(entity);
 
-            return await SaveChanges();
+            return await SaveChangesAsync();
 
         }
 
@@ -47,15 +54,25 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
             return DbSet.FindAsync(id);
         }
 
+        public TEntity Find(object id)
+        {
+            return DbSet.Find(id);
+        }
+
         public void UseTransaction(DbTransaction transaction)
         {
             _contextFactory.UseTransaction(transaction);
         }
 
 
-        protected async Task<bool> SaveChanges()
+        protected async Task<bool> SaveChangesAsync()
         {
             return await Context.SaveChangesAsync() > 0;
+        }
+
+        protected bool SaveChanges()
+        {
+            return Context.SaveChanges() > 0;
         }
 
     }

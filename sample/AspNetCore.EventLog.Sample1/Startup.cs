@@ -69,6 +69,8 @@ namespace AspNetCore.EventLog.Sample1
 
             app.UseMvc();
 
+            app.UseEventLog();
+
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var receiverService = scope.ServiceProvider.GetService<IReceiverService>();

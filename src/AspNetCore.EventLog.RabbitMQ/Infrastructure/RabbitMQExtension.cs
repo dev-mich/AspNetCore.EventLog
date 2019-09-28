@@ -26,8 +26,7 @@ namespace AspNetCore.EventLog.RabbitMQ.Infrastructure
                 HostName = _configuration.HostName,
                 Port = _configuration.Port,
                 UserName = _configuration.Username,
-                Password = _configuration.Password,
-                DispatchConsumersAsync = true
+                Password = _configuration.Password
             });
 
 

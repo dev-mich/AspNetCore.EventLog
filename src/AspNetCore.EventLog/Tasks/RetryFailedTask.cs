@@ -10,12 +10,12 @@ namespace AspNetCore.EventLog.Tasks
     class RetryFailedTask : BackgroundService
     {
         private readonly IReceivedStore _receivedStore;
-        private readonly MessageProcessor _messageProcessor;
+        // private readonly MessageProcessor _messageProcessor;
 
-        public RetryFailedTask(IReceivedStore receivedStore, MessageProcessor messageProcessor)
+        public RetryFailedTask(IReceivedStore receivedStore)//, MessageProcessor messageProcessor)
         {
             _receivedStore = receivedStore;
-            _messageProcessor = messageProcessor;
+            // _messageProcessor = messageProcessor;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

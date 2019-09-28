@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace AspNetCore.EventLog.Interfaces
 {
-    public interface IEventHandler<in TEvent> where TEvent : IIntegrationEvent
+    public interface IEventHandler<in TEvent> : IDisposable where TEvent : IIntegrationEvent
     {
 
         Task<bool> Handle(TEvent @event);

@@ -23,8 +23,9 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         private IConnection _connection;
         private IModel _channel;
-        private AsyncEventingBasicConsumer mqConsumer;
+        private EventingBasicConsumer mqConsumer;
         private int _recoveryFailedCount;
+        private ulong _deliveryTag;
 
         public RabbitMqEventBus(IServiceProvider serviceProvider, IConnectionFactory rabbitMqConnectionFactory, IExchangeResolver exchangeResolver)
         {
@@ -88,39 +89,36 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         }
 
+        public event EventHandler<Received> OnEventReceived;
 
-        private async Task Consume(object sender, BasicDeliverEventArgs @event)
+        public void Commit()
         {
+            _channel.BasicAck(_deliveryTag, false);
+        }
 
-            var processor = _serviceProvider.GetRequiredService<IMessageProcessor>();
+        public void Reject()
+        {
+            _channel.BasicReject(_deliveryTag, true);
+        }
 
-            try
-            {
-                var content = Encoding.UTF8.GetString(@event.Body);
 
-                var baseJsonContent = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+        private void Consume(object sender, BasicDeliverEventArgs @event)
+        {
+            _deliveryTag = @event.DeliveryTag;
 
-                var id = GetId(baseJsonContent);
+            var content = Encoding.UTF8.GetString(@event.Body);
 
-                if (!id.HasValue)
-                    throw new ArgumentNullException(nameof(id));
+            var baseJsonContent = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
 
-                await processor.Process(id.Value, @event.RoutingKey, content);
+            var id = GetId(baseJsonContent);
 
-                // event is persisted, ack the message
-                _channel.BasicAck(@event.DeliveryTag, false);
+            if (!id.HasValue)
+                throw new ArgumentNullException(nameof(id));
 
-            }
-            catch (ReceivedEventAlreadyPersistedException)
-            {
-                // event is already stored, ack message
-                _channel.BasicAck(@event.DeliveryTag, false);
-            }
-            catch (ReceivedEventNotPersistedException)
-            {
-                // reject event and ask for requeue
-                _channel.BasicReject(@event.DeliveryTag, true);
-            }
+            var received = new Received(id.Value, @event.RoutingKey, content);
+
+
+            OnEventReceived?.Invoke(sender, received);
 
 
         }
@@ -155,7 +153,7 @@ namespace AspNetCore.EventLog.RabbitMQ
             _channel = _connection.CreateModel();
 
 
-            mqConsumer = new AsyncEventingBasicConsumer(_channel);
+            mqConsumer = new EventingBasicConsumer(_channel);
 
             mqConsumer.Received += Consume;
 

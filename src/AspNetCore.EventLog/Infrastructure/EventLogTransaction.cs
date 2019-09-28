@@ -24,7 +24,7 @@ namespace AspNetCore.EventLog.Infrastructure
         public void Commit()
         {
             _transaction.Commit();
-            OnCommit?.Invoke();
+            OnCommit?.Invoke().Wait();
         }
 
 

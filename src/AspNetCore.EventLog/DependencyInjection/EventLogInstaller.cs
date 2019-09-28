@@ -4,6 +4,7 @@ using AspNetCore.EventLog.Infrastructure;
 using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.Services;
 using AspNetCore.EventLog.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AspNetCore.EventLog.DependencyInjection
@@ -21,7 +22,7 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.AddTransient<IPublisherService, PublisherService>();
             services.AddTransient<IReceiverService, ReceiverService>();
 
-            services.AddSingleton<IMessageProcessor, MessageProcessor>();
+            services.AddSingleton<ConsumerRegister>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<SubscriptionManager>();
 
@@ -37,6 +38,15 @@ namespace AspNetCore.EventLog.DependencyInjection
                 optionsExtension.AddServices(services);
             }
 
+        }
+
+
+        public static void UseEventLog(this IApplicationBuilder app)
+        {
+            // start consumer service instance
+            var consumerRegister = app.ApplicationServices.GetRequiredService<ConsumerRegister>();
+
+            consumerRegister.Register();
         }
 
 
