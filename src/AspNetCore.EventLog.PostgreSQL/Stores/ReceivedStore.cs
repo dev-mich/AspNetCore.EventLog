@@ -21,12 +21,15 @@ namespace AspNetCore.EventLog.PostgreSQL.Stores
 
             record.EventState = state;
 
+            if (state == ReceivedState.ConsumeFailed)
+                record.FailCount += 1;
+
             await UpdateAsync(record);
         }
 
         public Task<List<Received>> GetFailed()
         {
-            return DbSet.Where(e => e.EventState == ReceivedState.ConsumeFailed && e.RetryCount < 10).ToListAsync();
+            return DbSet.Where(e => e.EventState == ReceivedState.ConsumeFailed && e.FailCount < 10).ToListAsync();
         }
     }
 }

@@ -27,7 +27,8 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.AddSingleton<SubscriptionManager>();
 
             services.AddHostedService<MigratorTask>();
-            //services.AddHostedService<RetryFailedTask>();
+            services.AddHostedService<RetryPublishTask>();
+            services.AddHostedService<RetryHandlerTask>();
             services.AddHostedService<ReceivedHandlerTask>();
 
             var options = new EventLogOptions();

@@ -11,5 +11,7 @@ namespace AspNetCore.EventLog.Interfaces
 
         Task SetEventState(Guid id, PublishedState state);
 
+        Task<List<Published>> GetFailed();
+
     }
 }

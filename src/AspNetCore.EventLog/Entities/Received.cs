@@ -20,7 +20,7 @@ namespace AspNetCore.EventLog.Entities
         public ReceivedState EventState { get; set; }
 
 
-        public int RetryCount { get; set; }
+        public int FailCount { get; set; }
 
 
         public uint ConcurrencyToken { get; set; }
@@ -33,7 +33,7 @@ namespace AspNetCore.EventLog.Entities
             Content = content;
             ReceivedTime = DateTime.UtcNow;
             EventState = ReceivedState.Received;
-            RetryCount = 0;
+            FailCount = 0;
         }
 
 

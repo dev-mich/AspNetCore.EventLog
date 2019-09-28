@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.PostgreSQL.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCore.EventLog.PostgreSQL.Stores
 {
@@ -31,5 +32,9 @@ namespace AspNetCore.EventLog.PostgreSQL.Stores
             await UpdateAsync(@event);
         }
 
+        public Task<List<Published>> GetFailed()
+        {
+            return DbSet.Where(p => p.EventState == PublishedState.PublishedFailed).ToListAsync();
+        }
     }
 }
