@@ -11,12 +11,21 @@ script:
 - dotnet pack src/AspNetCore.EventLog.PostgreSQL/AspNetCore.EventLog.PostgreSQL.csproj
 - dotnet pack src/AspNetCore.EventLog.RabbitMQ/AspNetCore.EventLog.RabbitMQ.csproj
 deploy:
-  skip_cleanup: true
-  provider: script
-  script:
-  - dotnet nuget push src/AspNetCore.EventLog/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
-  - dotnet nuget push src/AspNetCore.EventLog.PostgreSQL/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
-  - dotnet nuget push src/AspNetCore.EventLog.RabbitMQ/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
-  on:
-    branch: master
-    tags: true
+  - skip_cleanup: true
+    provider: script
+    script: dotnet nuget push src/AspNetCore.EventLog/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
+    on:
+      branch: master
+      tags: true
+  - skip_cleanup: true
+    provider: script
+    script: dotnet nuget push src/AspNetCore.EventLog.PostgreSQL/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
+    on:
+      branch: master
+      tags: true
+  - skip_cleanup: true
+    provider: script
+    script: dotnet nuget push src/AspNetCore.EventLog.RabbitMQ/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key $NUGET_API_KEY
+    on:
+      branch: master
+      tags: true
