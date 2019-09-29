@@ -30,6 +30,13 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
             }
         }
 
+
+        public void CompleteTransaction()
+        {
+            _currentTransaction = null;
+            _context = null;
+        }
+
         public PostgresDbContext Context
         {
             get

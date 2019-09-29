@@ -50,6 +50,7 @@ namespace AspNetCore.EventLog.Services
 
         private void Transaction_OnCommit()
         {
+            _publishedStore.CompleteTransaction();
 
             _logger.LogInformation($"found {_pendings.Count} events pending");
 
