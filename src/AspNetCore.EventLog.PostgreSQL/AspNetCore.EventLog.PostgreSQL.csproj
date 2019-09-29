@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>2.0.4</Version>
+    <Version>2.0.5</Version>
     <Authors>Giacomo Michelon</Authors>
     <Company>Udressy</Company>
     <Description>Postgres persistence extension for AspNetCore.EventLog</Description>
-    <FileVersion>2.0.4</FileVersion>
-    <AssemblyVersion>2.0.4</AssemblyVersion>
+    <FileVersion>2.0.5</FileVersion>
+    <AssemblyVersion>2.0.5</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
