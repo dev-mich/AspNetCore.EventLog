@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.PostgreSQL.Extensions;
+using AspNetCore.EventLog.Sample1.Entities;
 using AspNetCore.EventLog.Sample1.Infrastructure;
 using AspNetCore.EventLog.Sample1.IntegrationEvents;
 using AspNetCore.EventLog.Services;
@@ -30,12 +31,11 @@ namespace AspNetCore.EventLog.Sample1.Controllers
 
             using (var transaction = _context.Database.BeginTransaction(_publisherService))
             {
+                await _publisherService.Publish("test.event", new TestIntegrationEvent());
 
-                for (int i = 0; i < 1000; i++)
-                {
-                    await _publisherService.Publish("test.event", new TestIntegrationEvent());
-                }
+                _context.TestEntities.Add(new TestEntity());
 
+                _context.SaveChanges();
 
                 transaction.Commit();
 

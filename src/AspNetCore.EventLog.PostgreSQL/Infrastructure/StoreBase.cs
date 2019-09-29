@@ -71,12 +71,6 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
         }
 
 
-        public void CompleteTransaction()
-        {
-            _contextFactory.CompleteTransaction();
-        }
-
-
         protected async Task<bool> SaveChangesAsync()
         {
             return await Context.SaveChangesAsync() > 0;

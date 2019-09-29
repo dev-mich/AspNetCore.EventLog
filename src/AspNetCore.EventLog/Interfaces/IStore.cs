@@ -8,8 +8,6 @@ namespace AspNetCore.EventLog.Interfaces
     {
         void UseTransaction(DbTransaction transaction);
 
-        void CompleteTransaction();
-
         Task<bool> AddAsync(T entity);
 
         bool Add(T entity);

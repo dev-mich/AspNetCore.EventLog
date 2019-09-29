@@ -76,6 +76,11 @@ namespace AspNetCore.EventLog.Sample1
                 var receiverService = scope.ServiceProvider.GetService<IReceiverService>();
 
                 receiverService.Subscribe<TestIntegrationEvent>("test.event");
+
+                // migrate database
+                var context = scope.ServiceProvider.GetService<TestDbContext>();
+
+                context.Database.Migrate();
             }
         }
     }
