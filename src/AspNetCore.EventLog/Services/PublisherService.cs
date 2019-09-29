@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Configuration;
 using AspNetCore.EventLog.Entities;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace AspNetCore.EventLog.Services
 {
-    class PublisherService : IPublisherService
+    class PublisherService : IPublisherService, IDisposable
     {
         private readonly IPublishedStore _publishedStore;
         private readonly IEventBus _eventBus;
@@ -27,11 +28,17 @@ namespace AspNetCore.EventLog.Services
         }
 
 
-        public Task Publish(string eventName, IIntegrationEvent @event)
+        private List<Published> _pendings;
+
+
+        public async Task Publish(string eventName, IIntegrationEvent @event)
         {
             var json = JsonConvert.SerializeObject(@event, _options.JsonSettings);
             var entry = Published.CreateEventLog(@event.Id, eventName, json);
-            return _publishedStore.AddAsync(entry);
+            await _publishedStore.AddAsync(entry);
+
+            _pendings = _pendings ?? new List<Published>();
+            _pendings.Add(entry);
         }
 
         public void SetTransaction(EventLogTransaction transaction)
@@ -43,13 +50,10 @@ namespace AspNetCore.EventLog.Services
 
         private void Transaction_OnCommit()
         {
-            _logger.LogInformation("start checking for pending events to publish");
 
-            var pendings = _publishedStore.GetPending();
+            _logger.LogInformation($"found {_pendings.Count} events pending");
 
-            _logger.LogInformation($"found {pendings.Count} events pending");
-
-            foreach (var pending in pendings)
+            foreach (var pending in _pendings)
             {
                 try
                 {
@@ -69,6 +73,11 @@ namespace AspNetCore.EventLog.Services
 
             _logger.LogInformation("pending events published");
 
+        }
+
+        public void Dispose()
+        {
+            _pendings = null;
         }
     }
 }

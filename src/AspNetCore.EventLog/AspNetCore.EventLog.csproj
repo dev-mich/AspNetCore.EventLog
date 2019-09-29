@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Company>Udressy</Company>
     <Description>Simple persistence based multipurpose event logging</Description>
     <Authors>Giacomo Michelon</Authors>
-    <FileVersion>2.0.2</FileVersion>
-    <AssemblyVersion>2.0.2</AssemblyVersion>
+    <FileVersion>2.0.3</FileVersion>
+    <AssemblyVersion>2.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
