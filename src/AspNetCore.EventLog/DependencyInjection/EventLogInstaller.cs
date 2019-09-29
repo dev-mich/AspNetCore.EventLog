@@ -30,6 +30,7 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.AddHostedService<RetryPublishTask>();
             services.AddHostedService<RetryHandlerTask>();
             services.AddHostedService<ReceivedHandlerTask>();
+            services.AddHostedService<PublisherTask>();
 
             var options = new EventLogOptions();
             setupOptions(options);

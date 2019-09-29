@@ -11,8 +11,11 @@ namespace AspNetCore.EventLog.Infrastructure
 {
     class BackgroundTaskQueue: IBackgroundTaskQueue
     {
-        private readonly ConcurrentQueue<Received> _workItems = new ConcurrentQueue<Received>();
-        private readonly SemaphoreSlim _signal = new SemaphoreSlim(0);
+        private readonly ConcurrentQueue<Received> _receivedItems = new ConcurrentQueue<Received>();
+        private readonly SemaphoreSlim _receivedSignal = new SemaphoreSlim(0);
+
+        private readonly ConcurrentQueue<Published> _publishedItems = new ConcurrentQueue<Published>();
+        private readonly SemaphoreSlim _publishedSignal = new SemaphoreSlim(0);
 
         public void QueueReceivedEvent(Received @event)
         {
@@ -21,16 +24,36 @@ namespace AspNetCore.EventLog.Infrastructure
                 throw new ArgumentNullException(nameof(@event));
             }
 
-            _workItems.Enqueue(@event);
-            _signal.Release();
+            _receivedItems.Enqueue(@event);
+            _receivedSignal.Release();
         }
 
-        public async Task<Received> DequeueAsync(CancellationToken cancellationToken)
+        public async Task<Received> DequeueReceivedAsync(CancellationToken cancellationToken)
         {
-            await _signal.WaitAsync(cancellationToken);
-            _workItems.TryDequeue(out var workItem);
+            await _receivedSignal.WaitAsync(cancellationToken);
+            _receivedItems.TryDequeue(out var workItem);
 
             return workItem;
         }
+
+        public void QueuePublishedEvent(Published @event)
+        {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
+            _publishedItems.Enqueue(@event);
+            _publishedSignal.Release();
+        }
+
+        public async Task<Published> DequeuePublisheddAsync(CancellationToken cancellationToken)
+        {
+            await _publishedSignal.WaitAsync(cancellationToken);
+            _publishedItems.TryDequeue(out var workItem);
+
+            return workItem;
+        }
+
     }
 }

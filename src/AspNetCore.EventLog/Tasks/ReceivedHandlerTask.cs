@@ -54,7 +54,7 @@ namespace AspNetCore.EventLog.Tasks
 
             while (!_shutdown.IsCancellationRequested)
             {
-                var received = await _taskQueue.DequeueAsync(_shutdown.Token);
+                var received = await _taskQueue.DequeueReceivedAsync(_shutdown.Token);
 
                 try
                 {

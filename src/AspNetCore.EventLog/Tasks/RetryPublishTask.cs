@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Interfaces;
 using Microsoft.Extensions.Hosting;
 
 namespace AspNetCore.EventLog.Tasks
 {
-    public class RetryPublishTask: BackgroundService
+    class RetryPublishTask: BackgroundService
     {
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
         private readonly IPublishedStore _publishedStore;
-        private readonly IEventBus _eventBus;
 
-        public RetryPublishTask(IPublishedStore publishedStore, IEventBus eventBus)
+        public RetryPublishTask(IBackgroundTaskQueue backgroundTaskQueue, IPublishedStore publishedStore)
         {
+            _backgroundTaskQueue = backgroundTaskQueue;
             _publishedStore = publishedStore;
-            _eventBus = eventBus;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -26,19 +25,7 @@ namespace AspNetCore.EventLog.Tasks
 
                 foreach (var fail in failed)
                 {
-                    try
-                    {
-                        await _publishedStore.SetEventStateAsync(fail.Id, PublishedState.InProgress);
-
-                        _eventBus.Publish(fail.EventName, fail.Content);
-
-                        await _publishedStore.SetEventStateAsync(fail.Id, PublishedState.Published);
-                    }
-                    catch (Exception ex)
-                    {
-                        await _publishedStore.SetEventStateAsync(fail.Id, PublishedState.PublishedFailed);
-                    }
-
+                    _backgroundTaskQueue.QueuePublishedEvent(fail);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);

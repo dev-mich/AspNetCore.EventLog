@@ -14,15 +14,15 @@ namespace AspNetCore.EventLog.Services
     class PublisherService : IPublisherService, IDisposable
     {
         private readonly IPublishedStore _publishedStore;
-        private readonly IEventBus _eventBus;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
         private readonly EventLogOptions _options;
         private readonly ILogger<PublisherService> _logger;
 
-        public PublisherService(IPublishedStore publishedStore, IEventBus eventBus, IOptions<EventLogOptions> options,
+        public PublisherService(IPublishedStore publishedStore, IBackgroundTaskQueue backgroundTaskQueue, IOptions<EventLogOptions> options,
             ILogger<PublisherService> logger)
         {
             _publishedStore = publishedStore;
-            _eventBus = eventBus;
+            _backgroundTaskQueue = backgroundTaskQueue;
             _logger = logger;
             _options = options.Value;
         }
@@ -55,20 +55,7 @@ namespace AspNetCore.EventLog.Services
 
             foreach (var pending in _pendings)
             {
-                try
-                {
-                    _publishedStore.SetEventStateAsync(pending.Id, PublishedState.InProgress);
-
-                    _eventBus.Publish(pending.EventName, pending.Content);
-
-                    _publishedStore.SetEventStateAsync(pending.Id, PublishedState.Published);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Dispatch failed for event {pending.Id} of type {pending.EventName} due to {ex.Message}");
-
-                    _publishedStore.SetEventStateAsync(pending.Id, PublishedState.PublishedFailed);
-                }
+                _backgroundTaskQueue.QueuePublishedEvent(pending);
             }
 
             _logger.LogInformation("pending events published");

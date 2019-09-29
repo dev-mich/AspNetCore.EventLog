@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 
@@ -9,7 +8,12 @@ namespace AspNetCore.EventLog.Interfaces
     {
         void QueueReceivedEvent(Received @event);
 
-        Task<Received> DequeueAsync(
+        Task<Received> DequeueReceivedAsync(
+            CancellationToken cancellationToken);
+
+        void QueuePublishedEvent(Published @event);
+
+        Task<Published> DequeuePublisheddAsync(
             CancellationToken cancellationToken);
     }
 }
