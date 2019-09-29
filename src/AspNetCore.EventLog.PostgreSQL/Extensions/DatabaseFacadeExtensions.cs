@@ -10,7 +10,6 @@ namespace AspNetCore.EventLog.PostgreSQL.Extensions
 
         public static EventLogTransaction BeginTransaction(this DatabaseFacade database, IPublisherService service)
         {
-            database.AutoTransactionsEnabled = false;
 
             var trans = database.BeginTransaction();
 
