@@ -41,27 +41,33 @@ namespace AspNetCore.EventLog.Services
             _publishedStore.UseTransaction(transaction.DbTransaction);
         }
 
-        private async Task Transaction_OnCommit()
+        private void Transaction_OnCommit()
         {
+            _logger.LogInformation("start checking for pending events to publish");
+
             var pendings = _publishedStore.GetPending();
+
+            _logger.LogInformation($"found {pendings.Count} events pending");
 
             foreach (var pending in pendings)
             {
                 try
                 {
-                    await _publishedStore.SetEventState(pending.Id, PublishedState.InProgress);
+                    _publishedStore.SetEventStateAsync(pending.Id, PublishedState.InProgress);
 
                     _eventBus.Publish(pending.EventName, pending.Content);
 
-                    await _publishedStore.SetEventState(pending.Id, PublishedState.Published);
+                    _publishedStore.SetEventStateAsync(pending.Id, PublishedState.Published);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError($"Dispatch failed for event {pending.Id} of type {pending.EventName} due to {ex.Message}");
 
-                    await _publishedStore.SetEventState(pending.Id, PublishedState.PublishedFailed);
+                    _publishedStore.SetEventStateAsync(pending.Id, PublishedState.PublishedFailed);
                 }
             }
+
+            _logger.LogInformation("pending events published");
 
         }
     }

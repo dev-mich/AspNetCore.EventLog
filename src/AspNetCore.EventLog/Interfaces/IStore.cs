@@ -16,6 +16,8 @@ namespace AspNetCore.EventLog.Interfaces
 
         Task<bool> UpdateAsync(T entity);
 
+        bool Update(T entity);
+
         Task<T> FindAsync(object id);
 
         T Find(object id);

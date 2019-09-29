@@ -49,6 +49,12 @@ namespace AspNetCore.EventLog.PostgreSQL.Infrastructure
 
         }
 
+        public bool Update(TEntity entity)
+        {
+            DbSet.Update(entity);
+            return SaveChanges();
+        }
+
         public Task<TEntity> FindAsync(object id)
         {
             return DbSet.FindAsync(id);

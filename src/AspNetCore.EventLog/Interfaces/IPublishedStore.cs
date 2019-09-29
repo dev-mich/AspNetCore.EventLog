@@ -9,7 +9,9 @@ namespace AspNetCore.EventLog.Interfaces
     {
         List<Published> GetPending();
 
-        Task SetEventState(Guid id, PublishedState state);
+        Task SetEventStateAsync(Guid id, PublishedState state);
+
+        void SetEventState(Guid id, PublishedState state);
 
         Task<List<Published>> GetFailed();
 

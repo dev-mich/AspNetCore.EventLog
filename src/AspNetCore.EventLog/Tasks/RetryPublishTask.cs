@@ -28,15 +28,15 @@ namespace AspNetCore.EventLog.Tasks
                 {
                     try
                     {
-                        await _publishedStore.SetEventState(fail.Id, PublishedState.InProgress);
+                        await _publishedStore.SetEventStateAsync(fail.Id, PublishedState.InProgress);
 
                         _eventBus.Publish(fail.EventName, fail.Content);
 
-                        await _publishedStore.SetEventState(fail.Id, PublishedState.Published);
+                        await _publishedStore.SetEventStateAsync(fail.Id, PublishedState.Published);
                     }
                     catch (Exception ex)
                     {
-                        await _publishedStore.SetEventState(fail.Id, PublishedState.PublishedFailed);
+                        await _publishedStore.SetEventStateAsync(fail.Id, PublishedState.PublishedFailed);
                     }
 
                 }

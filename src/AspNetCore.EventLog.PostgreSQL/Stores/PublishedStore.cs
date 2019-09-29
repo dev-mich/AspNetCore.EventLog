@@ -23,13 +23,22 @@ namespace AspNetCore.EventLog.PostgreSQL.Stores
             return Context.ChangeTracker.Entries<Published>().Select(c => c.Entity).ToList();
         }
 
-        public async Task SetEventState(Guid id, PublishedState state)
+        public async Task SetEventStateAsync(Guid id, PublishedState state)
         {
             var @event = await DbSet.FindAsync(id);
 
             @event.EventState = state;
 
             await UpdateAsync(@event);
+        }
+
+        public void SetEventState(Guid id, PublishedState state)
+        {
+            var @event = DbSet.Find(id);
+
+            @event.EventState = state;
+
+            Update(@event);
         }
 
         public Task<List<Published>> GetFailed()

@@ -15,7 +15,7 @@ namespace AspNetCore.EventLog.Infrastructure
         }
 
 
-        public delegate Task Committed();
+        public delegate void Committed();
         public event Committed OnCommit;
 
         public DbTransaction DbTransaction => _transaction;
@@ -24,7 +24,7 @@ namespace AspNetCore.EventLog.Infrastructure
         public void Commit()
         {
             _transaction.Commit();
-            OnCommit?.Invoke().Wait();
+            OnCommit?.Invoke();
         }
 
 
