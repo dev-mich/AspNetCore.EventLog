@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>2.0.8</Version>
+    <Version>2.0.9</Version>
     <Authors>Giacomo Michelon</Authors>
     <Company>Udressy</Company>
     <Description>RabbitMQ extension for AspNetCore.EventLog</Description>
-    <FileVersion>2.0.8</FileVersion>
-    <AssemblyVersion>2.0.8</AssemblyVersion>
+    <FileVersion>2.0.9</FileVersion>
+    <AssemblyVersion>2.0.9</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

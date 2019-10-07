@@ -5,6 +5,7 @@ using AspNetCore.EventLog.Configuration;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Infrastructure;
 using AspNetCore.EventLog.Interfaces;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -50,6 +51,8 @@ namespace AspNetCore.EventLog.Services
 
         private void Transaction_OnCommit()
         {
+            if(_pendings == null || !_pendings.Any())
+                return;
 
             _logger.LogInformation($"found {_pendings.Count} events pending");
 
