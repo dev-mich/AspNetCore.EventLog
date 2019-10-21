@@ -8,6 +8,12 @@ namespace AspNetCore.EventLog.Entities
         public Guid Id { get; set; }
 
 
+        public string CorrelationId { get; set; }
+
+
+        public string ReplyTo { get; set; }
+
+
         public string EventName { get; set; }
 
 
@@ -26,9 +32,11 @@ namespace AspNetCore.EventLog.Entities
         public uint ConcurrencyToken { get; set; }
 
 
-        public Received(Guid id, string eventName, string content)
+        public Received(Guid id, string eventName, string content, string replyTo, string correlationId)
         {
             Id = id;
+            ReplyTo = replyTo;
+            CorrelationId = correlationId;
             EventName = eventName;
             Content = content;
             ReceivedTime = DateTime.UtcNow;
