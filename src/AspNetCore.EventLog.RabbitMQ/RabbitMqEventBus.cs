@@ -17,6 +17,7 @@ namespace AspNetCore.EventLog.RabbitMQ
     public class RabbitMqEventBus : IEventBus, IDisposable
     {
 
+        private readonly ILogger<RabbitMqEventBus> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IConnectionFactory _connectionFactory;
         private readonly IExchangeResolver _exchangeResolver;
@@ -27,8 +28,9 @@ namespace AspNetCore.EventLog.RabbitMQ
         private int _recoveryFailedCount;
         private ulong _deliveryTag;
 
-        public RabbitMqEventBus(IServiceProvider serviceProvider, IConnectionFactory rabbitMqConnectionFactory, IExchangeResolver exchangeResolver)
+        public RabbitMqEventBus(ILogger<RabbitMqEventBus>  logger, IServiceProvider serviceProvider, IConnectionFactory rabbitMqConnectionFactory, IExchangeResolver exchangeResolver)
         {
+            _logger = logger;
             _serviceProvider = serviceProvider;
             _connectionFactory = rabbitMqConnectionFactory;
             _exchangeResolver = exchangeResolver;
@@ -104,9 +106,13 @@ namespace AspNetCore.EventLog.RabbitMQ
 
         private void Consume(object sender, BasicDeliverEventArgs @event)
         {
+            _logger.LogInformation($"received message at {DateTime.UtcNow}, routing key: {@event.RoutingKey}");
+
             _deliveryTag = @event.DeliveryTag;
 
             var content = Encoding.UTF8.GetString(@event.Body);
+
+            _logger.LogInformation($"raw content is {content}");
 
             var baseJsonContent = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
 
@@ -172,6 +178,10 @@ namespace AspNetCore.EventLog.RabbitMQ
         private Guid? GetId(Dictionary<string, object> @event)
         {
             if (@event.TryGetValue("Id", out object id))
+                return Guid.Parse(id.ToString());
+
+            // search for lowercase also if not found for uppercase
+            if (@event.TryGetValue("id", out id))
                 return Guid.Parse(id.ToString());
 
             return null;
