@@ -54,7 +54,11 @@ namespace AspNetCore.EventLog.Tasks
 
             while (!_shutdown.IsCancellationRequested)
             {
+                _logger.LogInformation("received handler task started");
+
                 var received = await _taskQueue.DequeueReceivedAsync(_shutdown.Token);
+
+                _logger.LogInformation($"received event {received.Id} dequeued");
 
                 try
                 {
