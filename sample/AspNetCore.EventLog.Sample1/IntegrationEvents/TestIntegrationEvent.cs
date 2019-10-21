@@ -6,6 +6,8 @@ namespace AspNetCore.EventLog.Sample1.IntegrationEvents
 {
     public class TestIntegrationEvent : IIntegrationEvent
     {
+        public Guid? CorrelationId { get; set; }
+
         public Guid Id { get; set; }
 
         public string EventStuff { get; set; }

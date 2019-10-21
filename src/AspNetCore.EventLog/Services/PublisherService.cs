@@ -32,10 +32,15 @@ namespace AspNetCore.EventLog.Services
         private List<Published> _pendings;
 
 
-        public async Task Publish(string eventName, IIntegrationEvent @event)
+        public async Task Publish(string eventName, IIntegrationEvent @event, string replyTo = null, string correlationId = null)
         {
+            if (!string.IsNullOrEmpty(replyTo) && correlationId == null)
+            {
+                throw new ArgumentNullException(nameof(correlationId));
+            }
+
             var json = JsonConvert.SerializeObject(@event, _options.JsonSettings);
-            var entry = Published.CreateEventLog(@event.Id, eventName, json);
+            var entry = Published.CreateEventLog(@event.Id, eventName, json, correlationId, replyTo);
             await _publishedStore.AddAsync(entry);
 
             _pendings = _pendings ?? new List<Published>();

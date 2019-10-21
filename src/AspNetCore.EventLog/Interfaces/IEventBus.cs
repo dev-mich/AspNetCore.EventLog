@@ -6,7 +6,7 @@ namespace AspNetCore.EventLog.Interfaces
     public interface IEventBus
     {
 
-        void Publish(string eventName, string content);
+        void Publish(string eventName, string content, string replyTo = null, string correlationId = null);
 
         void Subscribe(string eventName);
 

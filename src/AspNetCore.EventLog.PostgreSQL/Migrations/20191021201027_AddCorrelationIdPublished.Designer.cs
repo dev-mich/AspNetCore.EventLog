@@ -3,15 +3,17 @@ using System;
 using AspNetCore.EventLog.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AspNetCore.EventLog.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresDbContext))]
-    partial class PostgresDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191021201027_AddCorrelationIdPublished")]
+    partial class AddCorrelationIdPublished
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +36,7 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<string>("CorrelationId");
+                    b.Property<Guid?>("CorrelationId");
 
                     b.Property<DateTime>("CreationTime");
 
@@ -43,8 +45,6 @@ namespace AspNetCore.EventLog.PostgreSQL.Migrations
                         .HasMaxLength(50);
 
                     b.Property<int>("EventState");
-
-                    b.Property<string>("ReplyTo");
 
                     b.HasKey("Id");
 

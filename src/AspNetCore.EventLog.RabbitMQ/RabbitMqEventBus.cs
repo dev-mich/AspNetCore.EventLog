@@ -38,7 +38,7 @@ namespace AspNetCore.EventLog.RabbitMQ
         }
 
 
-        public void Publish(string eventName, string content)
+        public void Publish(string eventName, string content, string replyTo = null, string correlationId = null)
         {
             if (string.IsNullOrEmpty(eventName))
                 throw new ArgumentNullException(nameof(eventName));
@@ -54,10 +54,21 @@ namespace AspNetCore.EventLog.RabbitMQ
             if (string.IsNullOrEmpty(exchangeName))
                 throw new ArgumentNullException(nameof(exchangeName));
 
+            // create basic properties
+            var props = _channel.CreateBasicProperties();
+
+            if (!string.IsNullOrEmpty(replyTo))
+            {
+                props.ReplyTo = replyTo;
+                props.CorrelationId = correlationId ?? throw new ArgumentNullException(nameof(correlationId));
+
+                _channel.QueueDeclare(replyTo, true);
+            }
+
             // passive declare exchange to ensure that exist
             _channel.ExchangeDeclarePassive(exchangeName);
 
-            _channel.BasicPublish(exchangeName, eventName, basicProperties: null, body: body);
+            _channel.BasicPublish(exchangeName, eventName, props, body);
 
         }
 
@@ -115,7 +126,7 @@ namespace AspNetCore.EventLog.RabbitMQ
             if (!id.HasValue)
                 throw new ArgumentNullException(nameof(id));
 
-            var received = new Received(id.Value, @event.RoutingKey, content);
+            var received = new Received(id.Value, @event.RoutingKey, content, @event.BasicProperties.ReplyTo, @event.BasicProperties.CorrelationId);
 
 
             OnEventReceived?.Invoke(sender, received);

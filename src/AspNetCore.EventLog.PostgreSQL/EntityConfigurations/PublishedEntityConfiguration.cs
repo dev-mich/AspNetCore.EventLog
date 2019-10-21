@@ -18,7 +18,7 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 
             builder.Property(l => l.EventName).IsRequired().HasMaxLength(50);
 
-            builder.Property(l => l.Content).HasColumnType("json").IsRequired();
+            builder.Property(l => l.Content).HasColumnType("jsonb").IsRequired();
 
             builder.Property(l => l.CreationTime).IsRequired();
 

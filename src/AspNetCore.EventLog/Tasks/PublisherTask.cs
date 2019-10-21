@@ -11,7 +11,7 @@ namespace AspNetCore.EventLog.Tasks
     {
         private readonly IPublishedStore _publishedStore;
         private readonly IEventBus _eventBus;
-        private IBackgroundTaskQueue _backgroundTaskQueue;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
         private readonly CancellationTokenSource _shutdown;
 
         private Task _backgroundTask;
@@ -47,7 +47,7 @@ namespace AspNetCore.EventLog.Tasks
                 {
                     await _publishedStore.SetEventStateAsync(@event.Id, PublishedState.InProgress);
 
-                    _eventBus.Publish(@event.EventName, @event.Content);
+                    _eventBus.Publish(@event.EventName, @event.Content, @event.ReplyTo, @event.CorrelationId);
 
                     await _publishedStore.SetEventStateAsync(@event.Id, PublishedState.Published);
                 }

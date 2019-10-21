@@ -96,6 +96,13 @@ namespace AspNetCore.EventLog.Tasks
                         var targetState = success ? ReceivedState.Consumed : ReceivedState.Rejected;
 
                         await _receivedStore.SetEventState(received.Id, targetState);
+
+                        //// check if i have to publish a response
+                        //if (targetState == ReceivedState.Consumed && !string.IsNullOrEmpty(received.ReplyTo))
+                        //{
+                        //    var published = new 
+                        //}
+
                     }
 
 
