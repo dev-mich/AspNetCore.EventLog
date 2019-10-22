@@ -19,8 +19,8 @@ namespace AspNetCore.EventLog.DependencyInjection
 
             services.Configure(setupOptions);
 
-            services.AddTransient<IPublisherService, PublisherService>();
-            services.AddTransient<IReceiverService, ReceiverService>();
+            services.AddScoped<IPublisherService, PublisherService>();
+            services.AddScoped<IReceiverService, ReceiverService>();
 
             services.AddSingleton<ConsumerRegister>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
