@@ -33,17 +33,15 @@ namespace AspNetCore.EventLog.Tasks
             {
                 var receivedStore = _serviceProvider.GetRequiredService<IReceivedStore>();
 
-                _logger.LogInformation("start check for waiting replies");
-
                 var waitingReplies = await receivedStore.GetAwaitingReplies();
-
-                _logger.LogInformation($"fund {waitingReplies?.Count} wairing replies");
 
                 foreach (var waiting in waitingReplies)
                 {
 
                     try
                     {
+                        _logger.LogInformation($"start sending reply for event {waiting.Id} with correlation id {waiting.CorrelationId}");
+
                         // try to update reply send date to ensure that job fail in concurrency situations
                         waiting.ReplySended = DateTime.UtcNow;
 
@@ -67,6 +65,9 @@ namespace AspNetCore.EventLog.Tasks
                         waiting.ReplyState = ReplyState.Forwarded;
                         waiting.ReplySended = DateTime.UtcNow;
                         await receivedStore.UpdateAsync(waiting);
+
+                        _logger.LogInformation($"reply sent for event {waiting.Id} with correlation id {waiting.CorrelationId}");
+
                     } catch(Exception ex)
                     {
                         _logger.LogInformation($"reply publish failed due to: {ex.Message}");
@@ -74,9 +75,7 @@ namespace AspNetCore.EventLog.Tasks
 
                 }
 
-                _logger.LogInformation($"replies check completed");
-
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
 
             _logger.LogInformation("reply task is stopping");

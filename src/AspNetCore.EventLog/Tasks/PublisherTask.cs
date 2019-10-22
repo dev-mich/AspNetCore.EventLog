@@ -5,6 +5,7 @@ using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace AspNetCore.EventLog.Tasks
 {
@@ -13,15 +14,17 @@ namespace AspNetCore.EventLog.Tasks
         private readonly IServiceProvider _serviceProvider;
         private readonly IEventBus _eventBus;
         private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+        private readonly ILogger<PublisherTask> _logger;
         private readonly CancellationTokenSource _shutdown;
 
         private Task _backgroundTask;
 
-        public PublisherTask(IServiceProvider serviceprovider, IEventBus eventBus, IBackgroundTaskQueue backgroundTaskQueue)
+        public PublisherTask(IServiceProvider serviceprovider, IEventBus eventBus, IBackgroundTaskQueue backgroundTaskQueue, ILogger<PublisherTask> logger)
         {
             _serviceProvider = serviceprovider;
             _eventBus = eventBus;
             _backgroundTaskQueue = backgroundTaskQueue;
+            _logger = logger;
             _shutdown = new CancellationTokenSource();
         }
 
@@ -54,8 +57,10 @@ namespace AspNetCore.EventLog.Tasks
 
                     await publishedStore.SetEventStateAsync(@event.Id, PublishedState.Published);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _logger.LogError($"failed to publish event {@event.Id} due to: {ex.Message}");
+
                     await publishedStore.SetEventStateAsync(@event.Id, PublishedState.PublishedFailed);
                 }
             }
