@@ -6,8 +6,6 @@ namespace AspNetCore.EventLog.Sample1.IntegrationEvents
 {
     public class TestIntegrationEvent : IIntegrationEvent
     {
-        public Guid? CorrelationId { get; set; }
-
         public Guid Id { get; set; }
 
         public string EventStuff { get; set; }
@@ -23,11 +21,11 @@ namespace AspNetCore.EventLog.Sample1.IntegrationEvents
 
     public class TestIntegrationEventHandler : IEventHandler<TestIntegrationEvent>
     {
-        public Task<bool> Handle(TestIntegrationEvent @event)
+        public Task<(bool, IIntegrationEvent)> Handle(TestIntegrationEvent @event, string correlationId)
         {
             Console.WriteLine(@event.EventStuff);
 
-            return Task.FromResult(true);
+            return Task.FromResult<(bool, IIntegrationEvent)>((true, new TestIntegrationCompleteEvent()));
         }
 
         public void Dispose()

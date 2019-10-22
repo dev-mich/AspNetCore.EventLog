@@ -19,7 +19,7 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
 
             builder.Property(l => l.EventName).IsRequired().HasMaxLength(50);
 
-            builder.Property(l => l.Content).HasColumnType("json").IsRequired();
+            builder.Property(l => l.Content).HasColumnType("jsonb").IsRequired();
 
             builder.Property(l => l.ReceivedTime).IsRequired();
 
@@ -30,6 +30,8 @@ namespace AspNetCore.EventLog.PostgreSQL.EntityConfigurations
                 .HasColumnType("xid")
                 .ValueGeneratedOnAddOrUpdate()
                 .IsConcurrencyToken();
+
+            builder.Property(l => l.ReplyContent).HasColumnType("jsonb");
 
         }
     }

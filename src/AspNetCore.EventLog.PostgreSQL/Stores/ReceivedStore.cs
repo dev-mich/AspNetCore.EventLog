@@ -31,5 +31,10 @@ namespace AspNetCore.EventLog.PostgreSQL.Stores
         {
             return DbSet.Where(e => e.EventState == ReceivedState.ConsumeFailed && e.FailCount < 10).ToListAsync();
         }
+
+        public Task<List<Received>> GetAwaitingReplies()
+        {
+            return DbSet.Where(e => e.EventState == ReceivedState.Consumed && !string.IsNullOrEmpty(e.ReplyTo) && e.ReplyState == ReplyState.Waiting).ToListAsync();
+        }
     }
 }

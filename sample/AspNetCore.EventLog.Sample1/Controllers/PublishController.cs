@@ -31,7 +31,9 @@ namespace AspNetCore.EventLog.Sample1.Controllers
 
             using (var transaction = _context.Database.BeginTransaction(_publisherService))
             {
-                await _publisherService.Publish("test.event", new TestIntegrationEvent());
+                var integrationEvt = new TestIntegrationEvent();
+
+                await _publisherService.Publish("test.event", integrationEvt, "test_reply", integrationEvt.Id.ToString());
 
                 _context.TestEntities.Add(new TestEntity());
 

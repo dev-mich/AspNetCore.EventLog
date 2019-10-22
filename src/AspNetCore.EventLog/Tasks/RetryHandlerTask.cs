@@ -4,18 +4,19 @@ using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Infrastructure;
 using AspNetCore.EventLog.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace AspNetCore.EventLog.Tasks
 {
     class RetryHandlerTask : BackgroundService
     {
-        private readonly IReceivedStore _receivedStore;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IBackgroundTaskQueue _taskQueue;
 
-        public RetryHandlerTask(IReceivedStore receivedStore, IBackgroundTaskQueue taskQueue)//, MessageProcessor messageProcessor)
+        public RetryHandlerTask(IServiceProvider serviceProvider, IBackgroundTaskQueue taskQueue)//, MessageProcessor messageProcessor)
         {
-            _receivedStore = receivedStore;
+            _serviceProvider = serviceProvider;
             _taskQueue = taskQueue;
         }
 
@@ -23,15 +24,16 @@ namespace AspNetCore.EventLog.Tasks
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                var receivedStore = _serviceProvider.GetRequiredService<IReceivedStore>();
 
-                var failed = await _receivedStore.GetFailed();
+                var failed = await receivedStore.GetFailed();
 
                 foreach (var fail in failed)
                 {
                     try
                     {
                         // set event state as received
-                        await _receivedStore.SetEventState(fail.Id, ReceivedState.Received);
+                        await receivedStore.SetEventState(fail.Id, ReceivedState.Received);
 
                         _taskQueue.QueueReceivedEvent(fail);
                     }

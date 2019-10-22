@@ -26,7 +26,14 @@ namespace AspNetCore.EventLog.Tasks
             {
                 var migrator = scope.ServiceProvider.GetRequiredService<IDbMigrator>();
 
-                await migrator.MigrateAsync();
+                try
+                {
+                    await migrator.MigrateAsync();
+                } catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
             }
 
 

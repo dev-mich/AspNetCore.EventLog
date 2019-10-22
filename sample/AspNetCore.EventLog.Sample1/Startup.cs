@@ -52,6 +52,7 @@ namespace AspNetCore.EventLog.Sample1
 
             // register integration event handlers
             services.AddScoped<IEventHandler<TestIntegrationEvent>, TestIntegrationEventHandler>();
+            services.AddScoped<IEventHandler<TestIntegrationCompleteEvent>, TestIntegrationCompleteEventHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +77,7 @@ namespace AspNetCore.EventLog.Sample1
                 var receiverService = scope.ServiceProvider.GetService<IReceiverService>();
 
                 receiverService.Subscribe<TestIntegrationEvent>("test.event");
+                receiverService.Subscribe<TestIntegrationCompleteEvent>("test_reply");
 
                 // migrate database
                 var context = scope.ServiceProvider.GetService<TestDbContext>();

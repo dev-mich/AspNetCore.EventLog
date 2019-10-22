@@ -19,8 +19,8 @@ namespace AspNetCore.EventLog.DependencyInjection
 
             services.Configure(setupOptions);
 
-            services.AddScoped<IPublisherService, PublisherService>();
-            services.AddScoped<IReceiverService, ReceiverService>();
+            services.AddTransient<IPublisherService, PublisherService>();
+            services.AddTransient<IReceiverService, ReceiverService>();
 
             services.AddSingleton<ConsumerRegister>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
@@ -31,6 +31,7 @@ namespace AspNetCore.EventLog.DependencyInjection
             services.AddHostedService<RetryHandlerTask>();
             services.AddHostedService<ReceivedHandlerTask>();
             services.AddHostedService<PublisherTask>();
+            services.AddHostedService<ReplyTask>();
 
             var options = new EventLogOptions();
             setupOptions(options);

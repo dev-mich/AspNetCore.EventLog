@@ -18,19 +18,17 @@ namespace AspNetCore.EventLog.Tasks
         private Task _backgroundTask;
         private readonly ILogger<ReceivedHandlerTask> _logger;
         private readonly IBackgroundTaskQueue _taskQueue;
-        private readonly IReceivedStore _receivedStore;
         private readonly SubscriptionManager _subscriptionManager;
         private readonly IServiceProvider _serviceProvider;
 
         public ReceivedHandlerTask(IBackgroundTaskQueue taskQueue,
-            ILogger<ReceivedHandlerTask> logger, IBackgroundTaskQueue taskQueue1, IReceivedStore receivedStore,
+            ILogger<ReceivedHandlerTask> logger, IBackgroundTaskQueue taskQueue1,
             SubscriptionManager subscriptionManager, IServiceProvider serviceProvider)
         {
             _shutdown = new CancellationTokenSource();
             _taskQueue = taskQueue;
             _logger = logger;
             _taskQueue = taskQueue1;
-            _receivedStore = receivedStore;
             _subscriptionManager = subscriptionManager;
             _serviceProvider = serviceProvider;
         }
@@ -60,6 +58,8 @@ namespace AspNetCore.EventLog.Tasks
 
                 _logger.LogInformation($"received event {received.Id} dequeued");
 
+                var receivedStore = _serviceProvider.GetRequiredService<IReceivedStore>();
+
                 try
                 {
 
@@ -67,7 +67,8 @@ namespace AspNetCore.EventLog.Tasks
                     {
 
                         // set event as in progress
-                        await _receivedStore.SetEventState(received.Id, ReceivedState.InProgress);
+                        received.EventState = ReceivedState.InProgress;
+                        await receivedStore.UpdateAsync(received);
 
                         // resolve subscription
                         var subscriptionType = _subscriptionManager.ResolveSubscription(received.EventName);
@@ -95,23 +96,27 @@ namespace AspNetCore.EventLog.Tasks
                         var @event = JsonConvert.DeserializeObject(received.Content, subscriptionType);
 
                         // call handler
-                        var success = await (Task<bool>) methodInfo.Invoke(handler, new []{ @event });
+                        var (success, reply) = await (Task<(bool, IIntegrationEvent)>) methodInfo.Invoke(handler, new []{ @event, received.CorrelationId });
 
                         var targetState = success ? ReceivedState.Consumed : ReceivedState.Rejected;
 
-                        await _receivedStore.SetEventState(received.Id, targetState);
 
-                        //// check if i have to publish a response
-                        //if (targetState == ReceivedState.Consumed && !string.IsNullOrEmpty(received.ReplyTo))
-                        //{
-                        //    var published = new 
-                        //}
+                        // update stored state
+                        received.EventState = targetState;
+
+                        if (reply != null)
+                        {
+                            received.ReplyContent = JsonConvert.SerializeObject(reply);
+                        }
+
+                        await receivedStore.UpdateAsync(received);
+
 
                     }
 
 
                 }
-                catch (DbUpdateConcurrencyException ex)
+                catch (DbUpdateConcurrencyException)
                 {
                     _logger.LogInformation(
                         $"concurrency exception occurred at {DateTime.UtcNow} for event with id {received.Id}");
@@ -120,7 +125,7 @@ namespace AspNetCore.EventLog.Tasks
                 {
                     _logger.LogError(ex.Message);
 
-                    await _receivedStore.SetEventState(received.Id, ReceivedState.ConsumeFailed);
+                    await receivedStore.SetEventState(received.Id, ReceivedState.ConsumeFailed);
                 }
 
 

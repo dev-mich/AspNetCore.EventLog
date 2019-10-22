@@ -10,5 +10,7 @@ namespace AspNetCore.EventLog.Interfaces
         Task SetEventState(Guid id, ReceivedState state);
 
         Task<List<Received>> GetFailed();
+
+        Task<List<Received>> GetAwaitingReplies();
     }
 }

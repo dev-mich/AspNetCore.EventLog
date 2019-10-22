@@ -53,7 +53,7 @@ namespace AspNetCore.EventLog.RabbitMQ
             // resolve exchange name
             var exchangeName = _exchangeResolver.ResolveExchange(eventName);
 
-            if (string.IsNullOrEmpty(exchangeName))
+            if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
 
             // create basic properties
@@ -64,11 +64,14 @@ namespace AspNetCore.EventLog.RabbitMQ
                 props.ReplyTo = replyTo;
                 props.CorrelationId = correlationId ?? throw new ArgumentNullException(nameof(correlationId));
 
-                _channel.QueueDeclare(replyTo, true);
+                _channel.QueueDeclarePassive(replyTo);
             }
 
-            // passive declare exchange to ensure that exist
-            _channel.ExchangeDeclarePassive(exchangeName);
+            // passive declare exchange to ensure that exist (only if not the default one)
+            if (exchangeName != string.Empty)
+            {
+                _channel.ExchangeDeclarePassive(exchangeName);
+            }
 
             _channel.BasicPublish(exchangeName, eventName, props, body);
 
@@ -83,7 +86,7 @@ namespace AspNetCore.EventLog.RabbitMQ
             // resolve exchange name
             var exchangeName = _exchangeResolver.ResolveExchange(eventName);
 
-            if (string.IsNullOrEmpty(exchangeName))
+            if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
 
             var queueResolver = _serviceProvider.GetRequiredService<IQueueResolver>();
@@ -96,7 +99,9 @@ namespace AspNetCore.EventLog.RabbitMQ
 
             _channel.QueueDeclarePassive(queueName);
 
-            _channel.QueueBind(queueName, exchangeName, eventName);
+            // bind queue only if not working on default exchange
+            if (exchangeName != string.Empty)
+                _channel.QueueBind(queueName, exchangeName, eventName);
 
             _channel.BasicConsume(queueName, false, mqConsumer);
 

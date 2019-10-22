@@ -32,6 +32,15 @@ namespace AspNetCore.EventLog.Entities
         public uint ConcurrencyToken { get; set; }
 
 
+        public ReplyState ReplyState { get; set; }
+
+
+        public string ReplyContent { get; set; }
+
+
+        public DateTime? ReplySended { get; set; }
+
+
         public Received(Guid id, string eventName, string content, string replyTo, string correlationId)
         {
             Id = id;
@@ -42,6 +51,8 @@ namespace AspNetCore.EventLog.Entities
             ReceivedTime = DateTime.UtcNow;
             EventState = ReceivedState.Received;
             FailCount = 0;
+            ReplyState = string.IsNullOrEmpty(replyTo) ? ReplyState.NotNeeded : ReplyState.Waiting;
+            ReplySended = null;
         }
 
 
@@ -55,5 +66,13 @@ namespace AspNetCore.EventLog.Entities
         Consumed,
         ConsumeFailed,
         Rejected
+    }
+
+
+    public enum ReplyState
+    {
+        NotNeeded = 1,
+        Waiting,
+        Forwarded
     }
 }

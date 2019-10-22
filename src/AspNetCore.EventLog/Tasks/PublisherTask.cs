@@ -3,22 +3,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace AspNetCore.EventLog.Tasks
 {
     class PublisherTask : BackgroundService
     {
-        private readonly IPublishedStore _publishedStore;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IEventBus _eventBus;
         private readonly IBackgroundTaskQueue _backgroundTaskQueue;
         private readonly CancellationTokenSource _shutdown;
 
         private Task _backgroundTask;
 
-        public PublisherTask(IPublishedStore publishedStore, IEventBus eventBus, IBackgroundTaskQueue backgroundTaskQueue)
+        public PublisherTask(IServiceProvider serviceprovider, IEventBus eventBus, IBackgroundTaskQueue backgroundTaskQueue)
         {
-            _publishedStore = publishedStore;
+            _serviceProvider = serviceprovider;
             _eventBus = eventBus;
             _backgroundTaskQueue = backgroundTaskQueue;
             _shutdown = new CancellationTokenSource();
@@ -41,19 +42,21 @@ namespace AspNetCore.EventLog.Tasks
         {
             while (!_shutdown.IsCancellationRequested)
             {
+                var publishedStore = _serviceProvider.GetRequiredService<IPublishedStore>();
+
                 var @event = await _backgroundTaskQueue.DequeuePublisheddAsync(_shutdown.Token);
 
                 try
                 {
-                    await _publishedStore.SetEventStateAsync(@event.Id, PublishedState.InProgress);
+                    await publishedStore.SetEventStateAsync(@event.Id, PublishedState.InProgress);
 
                     _eventBus.Publish(@event.EventName, @event.Content, @event.ReplyTo, @event.CorrelationId);
 
-                    await _publishedStore.SetEventStateAsync(@event.Id, PublishedState.Published);
+                    await publishedStore.SetEventStateAsync(@event.Id, PublishedState.Published);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    await _publishedStore.SetEventStateAsync(@event.Id, PublishedState.PublishedFailed);
+                    await publishedStore.SetEventStateAsync(@event.Id, PublishedState.PublishedFailed);
                 }
             }
         }

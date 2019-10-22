@@ -6,6 +6,11 @@ namespace AspNetCore.EventLog.Sample1.EventBus
     {
         public string ResolveQueue(string eventName)
         {
+            if (eventName.Contains("reply"))
+            {
+                return eventName;
+            }
+
             return "test.queue";
         }
     }

@@ -6,6 +6,11 @@ namespace AspNetCore.EventLog.Sample1.EventBus
     {
         public string ResolveExchange(string eventName)
         {
+            if (eventName.Contains("reply"))
+            {
+                return "";
+            }
+
             return "test";
         }
     }

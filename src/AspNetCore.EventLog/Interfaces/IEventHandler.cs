@@ -6,7 +6,7 @@ namespace AspNetCore.EventLog.Interfaces
     public interface IEventHandler<in TEvent> : IDisposable where TEvent : IIntegrationEvent
     {
 
-        Task<bool> Handle(TEvent @event);
+        Task<(bool, IIntegrationEvent)> Handle(TEvent @event, string correlationId);
 
     }
 }
