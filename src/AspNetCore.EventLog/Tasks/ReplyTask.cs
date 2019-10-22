@@ -60,7 +60,7 @@ namespace AspNetCore.EventLog.Tasks
                     try
                     {
                         // now concurrency situations is avoided, publish reply
-                        _eventBus.Publish(waiting.ReplyTo, waiting.ReplyContent);
+                        _eventBus.Publish(waiting.ReplyTo, waiting.ReplyContent, "", waiting.CorrelationId);
 
 
                         // update reply state

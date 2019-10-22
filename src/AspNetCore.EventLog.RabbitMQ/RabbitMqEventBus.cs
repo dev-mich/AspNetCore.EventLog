@@ -62,10 +62,16 @@ namespace AspNetCore.EventLog.RabbitMQ
             if (!string.IsNullOrEmpty(replyTo))
             {
                 props.ReplyTo = replyTo;
-                props.CorrelationId = correlationId ?? throw new ArgumentNullException(nameof(correlationId));
-
                 _channel.QueueDeclarePassive(replyTo);
+
+                if (string.IsNullOrEmpty(correlationId))
+                {
+                    throw new ArgumentNullException(nameof(correlationId));
+                }
+
             }
+
+            props.CorrelationId = correlationId;
 
             // passive declare exchange to ensure that exist (only if not the default one)
             if (exchangeName != string.Empty)
