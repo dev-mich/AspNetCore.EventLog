@@ -49,10 +49,11 @@ namespace AspNetCore.EventLog.Tasks
 
         private async Task Processing()
         {
+            _logger.LogInformation("received handler task starting");
 
             while (!_shutdown.IsCancellationRequested)
             {
-                _logger.LogInformation("received handler task started");
+                _logger.LogInformation("waiting for received event");
 
                 var received = await _taskQueue.DequeueReceivedAsync(_shutdown.Token);
 
@@ -130,6 +131,8 @@ namespace AspNetCore.EventLog.Tasks
 
 
             }
+
+            _logger.LogInformation("received handler task stopping");
 
         }
     }

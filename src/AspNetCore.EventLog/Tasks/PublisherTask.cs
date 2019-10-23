@@ -30,6 +30,7 @@ namespace AspNetCore.EventLog.Tasks
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("publisher handler task starting");
 
             _backgroundTask = Task.Run(async () =>
             {
@@ -38,6 +39,8 @@ namespace AspNetCore.EventLog.Tasks
 
             await _backgroundTask;
 
+            _logger.LogInformation("publisher handler task stopping");
+
         }
 
 
@@ -45,9 +48,13 @@ namespace AspNetCore.EventLog.Tasks
         {
             while (!_shutdown.IsCancellationRequested)
             {
+                _logger.LogInformation("waiting for pending event to event bus");
+
                 var publishedStore = _serviceProvider.GetRequiredService<IPublishedStore>();
 
                 var @event = await _backgroundTaskQueue.DequeuePublisheddAsync(_shutdown.Token);
+
+                _logger.LogInformation($"found pending event {@event.Id}");
 
                 try
                 {
@@ -56,6 +63,8 @@ namespace AspNetCore.EventLog.Tasks
                     _eventBus.Publish(@event.EventName, @event.Content, @event.ReplyTo, @event.CorrelationId);
 
                     await publishedStore.SetEventStateAsync(@event.Id, PublishedState.Published);
+
+                    _logger.LogInformation($"pending event {@event.Id} published at {DateTime.UtcNow:dd/MM/yyyy : HH:mm}");
                 }
                 catch (Exception ex)
                 {
