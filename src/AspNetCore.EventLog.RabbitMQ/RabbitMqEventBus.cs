@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using AspNetCore.EventLog.Entities;
-using AspNetCore.EventLog.Exceptions;
 using AspNetCore.EventLog.Interfaces;
 using AspNetCore.EventLog.RabbitMQ.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,7 +69,8 @@ namespace AspNetCore.EventLog.RabbitMQ
 
             }
 
-            props.CorrelationId = correlationId;
+            if (correlationId != null)
+                props.CorrelationId = correlationId;
 
             // passive declare exchange to ensure that exist (only if not the default one)
             if (exchangeName != string.Empty)
