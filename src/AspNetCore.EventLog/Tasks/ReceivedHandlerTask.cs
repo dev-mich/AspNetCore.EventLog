@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AspNetCore.EventLog.Configuration;
 using AspNetCore.EventLog.Entities;
 using AspNetCore.EventLog.Infrastructure;
 using AspNetCore.EventLog.Interfaces;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace AspNetCore.EventLog.Tasks
@@ -20,10 +22,11 @@ namespace AspNetCore.EventLog.Tasks
         private readonly IBackgroundTaskQueue _taskQueue;
         private readonly SubscriptionManager _subscriptionManager;
         private readonly IServiceProvider _serviceProvider;
+        private readonly EventLogOptions _options;
 
         public ReceivedHandlerTask(IBackgroundTaskQueue taskQueue,
             ILogger<ReceivedHandlerTask> logger, IBackgroundTaskQueue taskQueue1,
-            SubscriptionManager subscriptionManager, IServiceProvider serviceProvider)
+            SubscriptionManager subscriptionManager, IServiceProvider serviceProvider, IOptions<EventLogOptions> options)
         {
             _shutdown = new CancellationTokenSource();
             _taskQueue = taskQueue;
@@ -31,6 +34,7 @@ namespace AspNetCore.EventLog.Tasks
             _taskQueue = taskQueue1;
             _subscriptionManager = subscriptionManager;
             _serviceProvider = serviceProvider;
+            _options = options.Value;
         }
 
 
@@ -107,11 +111,15 @@ namespace AspNetCore.EventLog.Tasks
 
                         if (reply != null)
                         {
-                            received.ReplyContent = JsonConvert.SerializeObject(reply);
+                            received.ReplyContent = JsonConvert.SerializeObject(reply, _options.JsonSettings);
                         }
 
                         await receivedStore.UpdateAsync(received);
 
+                        if (received.ReplyState == ReplyState.Waiting)
+                        {
+                            _taskQueue.QueueReplyEvent(received);
+                        }
 
                     }
 

@@ -17,6 +17,9 @@ namespace AspNetCore.EventLog.Infrastructure
         private readonly ConcurrentQueue<Published> _publishedItems = new ConcurrentQueue<Published>();
         private readonly SemaphoreSlim _publishedSignal = new SemaphoreSlim(0);
 
+        private readonly ConcurrentQueue<Received> _replyItems = new ConcurrentQueue<Received>();
+        private readonly SemaphoreSlim _replySignal = new SemaphoreSlim(0);
+
         public void QueueReceivedEvent(Received @event)
         {
             if (@event == null)
@@ -51,6 +54,25 @@ namespace AspNetCore.EventLog.Infrastructure
         {
             await _publishedSignal.WaitAsync(cancellationToken);
             _publishedItems.TryDequeue(out var workItem);
+
+            return workItem;
+        }
+
+        public void QueueReplyEvent(Received @event)
+        {
+            if (@event == null)
+            {
+                throw new ArgumentNullException(nameof(@event));
+            }
+
+            _replyItems.Enqueue(@event);
+            _replySignal.Release();
+        }
+
+        public async Task<Received> DequeueReplyAsync(CancellationToken cancellationToken)
+        {
+            await _replySignal.WaitAsync(cancellationToken);
+            _replyItems.TryDequeue(out var workItem);
 
             return workItem;
         }

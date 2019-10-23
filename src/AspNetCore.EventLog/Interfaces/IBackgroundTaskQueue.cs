@@ -15,5 +15,10 @@ namespace AspNetCore.EventLog.Interfaces
 
         Task<Published> DequeuePublisheddAsync(
             CancellationToken cancellationToken);
+
+        void QueueReplyEvent(Received @event);
+
+        Task<Received> DequeueReplyAsync(
+            CancellationToken cancellationToken);
     }
 }

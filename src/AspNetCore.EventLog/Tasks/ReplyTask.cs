@@ -15,77 +15,88 @@ namespace AspNetCore.EventLog.Tasks
         private readonly ILogger<ReplyTask> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IEventBus _eventBus;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+        private readonly CancellationTokenSource _shutdown;
+
+        private Task _backgroundTask;
 
 
-        public ReplyTask(ILogger<ReplyTask> logger, IServiceProvider serviceProvider, IEventBus eventBus)
+        public ReplyTask(ILogger<ReplyTask> logger, IServiceProvider serviceProvider, IEventBus eventBus, IBackgroundTaskQueue taskQueue)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
             _eventBus = eventBus;
+            _backgroundTaskQueue = taskQueue;
+            _shutdown = new CancellationTokenSource();
         }
 
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("reply task is starting");
+            _logger.LogInformation("reply handler task starting");
 
-            while (!stoppingToken.IsCancellationRequested)
+            _backgroundTask = Task.Run(async () =>
             {
+                await Processing();
+            }, stoppingToken);
+
+            await _backgroundTask;
+
+            _logger.LogInformation("reply handler task stopping");
+
+        }
+
+        private async Task Processing()
+        {
+            while(!_shutdown.IsCancellationRequested)
+            {
+                _logger.LogInformation("waiting for pending replies");
+
                 var receivedStore = _serviceProvider.GetRequiredService<IReceivedStore>();
 
-                var waitingReplies = await receivedStore.GetAwaitingReplies();
+                var waiting = await _backgroundTaskQueue.DequeueReplyAsync(_shutdown.Token);
 
-                if (waitingReplies != null)
+                try
                 {
+                    _logger.LogInformation($"start sending reply for event {waiting.Id} with correlation id {waiting.CorrelationId} and routing key {waiting.ReplyTo}");
 
-                    foreach (var waiting in waitingReplies)
-                    {
+                    // try to update reply send date to ensure that job fail in concurrency situations
+                    waiting.ReplySended = DateTime.UtcNow;
 
-                        try
-                        {
-                            _logger.LogInformation($"start sending reply for event {waiting.Id} with correlation id {waiting.CorrelationId}");
-
-                            // try to update reply send date to ensure that job fail in concurrency situations
-                            waiting.ReplySended = DateTime.UtcNow;
-
-                            await receivedStore.UpdateAsync(waiting);
-
-                        }
-                        catch (DbUpdateConcurrencyException)
-                        {
-                            _logger.LogError($"reply {waiting.Id} skipped due to concurrency");
-
-                            continue;
-                        }
-
-
-                        try
-                        {
-                            // now concurrency situations is avoided, publish reply
-                            _eventBus.Publish(waiting.ReplyTo, waiting.ReplyContent, "", waiting.CorrelationId);
-
-
-                            // update reply state
-                            waiting.ReplyState = ReplyState.Forwarded;
-                            waiting.ReplySended = DateTime.UtcNow;
-                            await receivedStore.UpdateAsync(waiting);
-
-                            _logger.LogInformation($"reply sent for event {waiting.Id} with correlation id {waiting.CorrelationId}");
-
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogInformation($"reply publish failed due to: {ex.Message}");
-                        }
-
-                    }
+                    await receivedStore.UpdateAsync(waiting);
 
                 }
+                catch (DbUpdateConcurrencyException)
+                {
+                    _logger.LogError($"reply {waiting.Id} skipped due to concurrency");
 
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                    continue;
+                }
+
+
+                try
+                {
+                    // now concurrency situations is avoided, publish reply
+                    _eventBus.Publish(waiting.ReplyTo, waiting.ReplyContent, "", waiting.CorrelationId);
+
+
+                    // update reply state
+                    waiting.ReplyState = ReplyState.Forwarded;
+                    waiting.ReplySended = DateTime.UtcNow;
+                    await receivedStore.UpdateAsync(waiting);
+
+                    _logger.LogInformation($"reply published for event {waiting.Id} with correlation id {waiting.CorrelationId} with routing key {waiting.ReplyTo}");
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation($"reply publish failed due to: {ex.Message}");
+
+                    _backgroundTaskQueue.QueueReplyEvent(waiting);
+                }
+
             }
-
-            _logger.LogInformation("reply task is stopping");
         }
+
     }
 }
