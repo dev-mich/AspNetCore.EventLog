@@ -35,42 +35,49 @@ namespace AspNetCore.EventLog.Tasks
 
                 var waitingReplies = await receivedStore.GetAwaitingReplies();
 
-                foreach (var waiting in waitingReplies)
+                if (waitingReplies != null)
                 {
 
-                    try
+                    foreach (var waiting in waitingReplies)
                     {
-                        _logger.LogInformation($"start sending reply for event {waiting.Id} with correlation id {waiting.CorrelationId}");
 
-                        // try to update reply send date to ensure that job fail in concurrency situations
-                        waiting.ReplySended = DateTime.UtcNow;
+                        try
+                        {
+                            _logger.LogInformation($"start sending reply for event {waiting.Id} with correlation id {waiting.CorrelationId}");
 
-                        await receivedStore.UpdateAsync(waiting);
+                            // try to update reply send date to ensure that job fail in concurrency situations
+                            waiting.ReplySended = DateTime.UtcNow;
 
-                    } catch(DbUpdateConcurrencyException)
-                    {
-                        _logger.LogError($"reply {waiting.Id} skipped due to concurrency");
+                            await receivedStore.UpdateAsync(waiting);
 
-                        continue;
-                    }
+                        }
+                        catch (DbUpdateConcurrencyException)
+                        {
+                            _logger.LogError($"reply {waiting.Id} skipped due to concurrency");
 
-
-                    try
-                    {
-                        // now concurrency situations is avoided, publish reply
-                        _eventBus.Publish(waiting.ReplyTo, waiting.ReplyContent, "", waiting.CorrelationId);
+                            continue;
+                        }
 
 
-                        // update reply state
-                        waiting.ReplyState = ReplyState.Forwarded;
-                        waiting.ReplySended = DateTime.UtcNow;
-                        await receivedStore.UpdateAsync(waiting);
+                        try
+                        {
+                            // now concurrency situations is avoided, publish reply
+                            _eventBus.Publish(waiting.ReplyTo, waiting.ReplyContent, "", waiting.CorrelationId);
 
-                        _logger.LogInformation($"reply sent for event {waiting.Id} with correlation id {waiting.CorrelationId}");
 
-                    } catch(Exception ex)
-                    {
-                        _logger.LogInformation($"reply publish failed due to: {ex.Message}");
+                            // update reply state
+                            waiting.ReplyState = ReplyState.Forwarded;
+                            waiting.ReplySended = DateTime.UtcNow;
+                            await receivedStore.UpdateAsync(waiting);
+
+                            _logger.LogInformation($"reply sent for event {waiting.Id} with correlation id {waiting.CorrelationId}");
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogInformation($"reply publish failed due to: {ex.Message}");
+                        }
+
                     }
 
                 }
